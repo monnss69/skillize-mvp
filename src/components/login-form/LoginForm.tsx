@@ -8,6 +8,18 @@ import Image from 'next/image';
 export default function LoginForm() {
   const { data: session } = useSession();
 
+  const handleSignIn = () => {
+    signIn('google', {
+      callbackUrl: '/web/calendar',
+      prompt: 'select_account',
+      authorizationParams: {
+        access_type: 'offline',
+        prompt: 'consent select_account',
+        scope: 'https://www.googleapis.com/auth/calendar openid profile email',
+      },
+    });
+  }
+
   if (session) {
     return (
       <div className="w-full max-w-md p-8 space-y-6 bg-white/5 backdrop-blur-lg rounded-xl border border-gray-700 shadow-2xl">
@@ -31,7 +43,7 @@ export default function LoginForm() {
         <Button
           onClick={() => signOut({ callbackUrl: '/web/login' })}
           className="w-full"
-          variant="destructive"
+          variant="gradient"
           size="lg"
         >
           Sign Out
@@ -48,7 +60,7 @@ export default function LoginForm() {
       </div>
 
       <Button
-        onClick={() => signIn('google', { callbackUrl: '/web/calendar' })}
+        onClick={() => handleSignIn()}
         className="w-full group relative"
         variant="gradient"
         size="lg"

@@ -1,27 +1,47 @@
 "use client";
 
-import { format } from "date-fns";
+import { Dispatch, SetStateAction } from "react";
+import { format, addWeeks } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-export function CalendarHeader() {
-    const currentDate = new Date();
 
-    return (
-        <div className="flex items-center justify-between">
-            <div className="text-2xl font-bold flex items-center gap-2">
-                {format(currentDate, "MMMM")} {"  "}
-                <span className="text-2xl font-normal">
+interface CalendarHeaderProps {
+  referenceDate: Date;
+  onChangeDate: Dispatch<SetStateAction<Date>>;
+}
 
-                {format(currentDate, "yyyy")}
-            </span>
-        </div>
-        <div className="flex items-center gap-2">
-            <button className="p-2 rounded-full hover:bg-gray-700">
-                <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button className="p-2 rounded-full hover:bg-gray-700">
-                <ChevronRight className="w-4 h-4" />
-            </button>
-            </div>
-        </div>
-    )
+export function CalendarHeader({ referenceDate, onChangeDate }: CalendarHeaderProps) {
+  function handlePrevWeek() {
+    onChangeDate((current) => addWeeks(current, -1));
+  }
+
+  function handleNextWeek() {
+    onChangeDate((current) => addWeeks(current, 1));
+  }
+
+  return (
+    <div className="flex items-center justify-between">
+      <div className="text-2xl font-bold flex items-center gap-2">
+        {format(referenceDate, "MMMM")}{" "}
+        <span className="text-2xl font-normal">
+          {format(referenceDate, "yyyy")}
+        </span>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handlePrevWeek}
+          className="p-2 rounded-full hover:bg-gray-700"
+          aria-label="Previous week"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+        <button
+          onClick={handleNextWeek}
+          className="p-2 rounded-full hover:bg-gray-700"
+          aria-label="Next week"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
 }

@@ -20,19 +20,36 @@ export default function EventCard({ event }: EventCardProps) {
   const topStyle = initialTop;
   const heightStyle = initialDuration;
 
+  // Map Google Calendar color IDs to actual colors
+  const colorMap: { [key: string]: string } = {
+    '1': '#7986cb', // Lavender
+    '2': '#33b679', // Sage
+    '3': '#8e24aa', // Grape
+    '4': '#e67c73', // Flamingo
+    '5': '#f6c026', // Banana
+    '6': '#f5511d', // Tangerine
+    '7': '#039be5', // Peacock
+    '8': '#616161', // Graphite
+    '9': '#3f51b5', // Blueberry
+    '10': '#0b8043', // Basil
+    '11': '#d60000', // Tomato
+  };
+
+  const eventColor = colorMap[event.color] || '#039be5'; // Default to Peacock if color not found
+
   return (
     <div
       style={{ 
         top: `${topStyle}px`, 
         height: `${heightStyle}px`,
-        borderLeftColor: event.color?.replace(/[\[\]]/g, ''),
+        borderLeftColor: eventColor,
       }}
       className={`flex flex-col absolute left-0 right-0 mr-1 p-2 rounded-md cursor-move select-none text-sm overflow-hidden border-l-[4.5px]`}
     >
       {/* Background div with opacity */}
       <div 
         style={{ 
-          backgroundColor: event.color?.replace(/[\[\]]/g, ''),
+          backgroundColor: eventColor,
           opacity: 0.15,
         }}
         className="absolute inset-0 rounded-md"
