@@ -11,7 +11,7 @@ interface EventCardProps {
   event: CalendarEvent;
 }
 
-const EventCard = ({ event }: EventCardProps) => {
+export default function EventCard({ event }: EventCardProps) {
   // Compute the initial top (in minutes from midnight) and duration (in minutes)
   const initialTop = getHours(event.start) * 80 + getMinutes(event.start);
   const initialDuration = differenceInMinutes(event.end, event.start) * 4 / 3;
@@ -48,5 +48,3 @@ const EventCard = ({ event }: EventCardProps) => {
     </div>
   );
 };
-
-export default EventCard;

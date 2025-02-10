@@ -1,7 +1,8 @@
+"use client";
+
 import { useState } from "react";
 import { 
   format, 
-
   startOfMonth, 
   addDays,
   eachDayOfInterval,
