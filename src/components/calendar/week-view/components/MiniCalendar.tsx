@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { 
   format, 
+
   startOfMonth, 
   addDays,
   eachDayOfInterval,
@@ -8,8 +9,6 @@ import {
   isSameDay,
   addMonths,
   subMonths,
-  isSameWeek,
-  startOfWeek,
   subDays
 } from "date-fns";
 
@@ -30,32 +29,6 @@ export function MiniCalendar() {
 
   return (
     <div className="select-none">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={() => setCurrentDate(new Date())} 
-            className="text-sm font-medium hover:text-white"
-          >
-            {format(currentDate, "MMMM yyyy")}
-          </button>
-          <div className="flex gap-1">
-            <button
-              onClick={handlePrevMonth}
-              className="p-1 hover:bg-[#303030] rounded"
-            >
-              <ChevronLeft className="w-3 h-3" />
-            </button>
-            <button
-              onClick={handleNextMonth}
-              className="p-1 hover:bg-[#303030] rounded"
-            >
-              <ChevronRight className="w-3 h-3" />
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Calendar Grid */}
       <div className="grid grid-cols-7 gap-1 text-center text-sm">
         {/* Day headers */}

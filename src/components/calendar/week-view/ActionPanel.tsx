@@ -4,7 +4,11 @@ export function ActionPanel({ className }: { className?: string }) {
         {/* No upcoming meeting section */}
         <div className="mb-6">
           <h3 className="text-sm font-medium mb-2">No upcoming meeting</h3>
+          <p className="text-xs text-gray-400">
+            Add a new event to your calendar to get started.
+          </p>
         </div>
-      </aside>
+      </aside> 
+
     );
   }
