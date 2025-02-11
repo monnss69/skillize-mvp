@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --border: 215 27.9% 16.9%;
+  --muted: 217.2 32.6% 17.5%;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --border: 215 27.9% 16.9%;
+    --muted: 217.2 32.6% 17.5%;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.custom-scrollbar {
+  /* When the scrollbar is in its "thumb" state */
+  &::-webkit-scrollbar {
+    width: 4px;  /* Smaller width when not hovered */
+    transition: width 0.2s;  /* Smooth transition for width */
+  }
+
+  /* When hovering over the scrollbar */
+  &:hover::-webkit-scrollbar {
+    width: 8px;  /* Wider scrollbar when hovered */
+  }
+
+  /* The draggable scrolling element */
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);  /* Semi-transparent white */
+    border-radius: 3px;  /* Rounded corners */
+    transition: background 0.2s, width 0.2s;  /* Smooth hover effect */
+  }
+
+  /* When hovering over the thumb */
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);  /* Slightly more visible on hover */
+  }
+
+  /* The track (progress bar) */
+  &::-webkit-scrollbar-track {
+    background: transparent;  /* No background for the track */
+  }
+}
