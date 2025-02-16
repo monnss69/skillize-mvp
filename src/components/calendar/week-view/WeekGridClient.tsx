@@ -6,7 +6,6 @@ import { CalendarEvent } from "@/types";
 import { format, startOfWeek, addDays, isSameDay } from "date-fns";
 import EventCard from "./components/EventCard";
 import { CalendarHeader } from "./components/CalendarHeader";
-
 /**
  * WeekGridClient is a Client Component that:
  * 1. Fetches all events once upon mount using the user's session access token.
@@ -18,48 +17,28 @@ export function WeekGridClient() {
   const [referenceDate, setReferenceDate] = useState(new Date());
   const timeSlots = useMemo(() => Array.from({ length: 24 }, (_, i) => i), []);
 
-  // Fetch calendar events once on mount (client side)
   useEffect(() => {
-    async function fetchEvents() {
-      const accessToken = session?.user?.accessToken;
-      if (!accessToken) {
-        console.warn("No access token found; skipping fetch");
-        return;
-      }
-
+    const fetchEvents = async () => {
+      
       try {
-        const response = await fetch("/api/calendar/event", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ accessToken }),
-        });
-
-        if (!response.ok) {
-          console.error("Failed to fetch calendar events:", response.statusText);
-          return;
-        }
-
+        const response = await fetch(
+          `/api/calendar/event?userId=${session?.user.id}`,
+          {
+            method: "GET",
+          }
+        );
         const data = await response.json();
-        // Example transform from Google Calendar "items" array
-        const loadedEvents: CalendarEvent[] = data.items?.map((item: any) => ({
-          id: item.id,
-          title: item.summary || "Untitled Event",
-          start: new Date(item.start.dateTime),
-          end: new Date(item.end.dateTime),
-          color: item.colorId || "1",
-        })) || [];
-
-        setEvents(loadedEvents);
+        setEvents(data.data || []);
       } catch (error) {
-        console.error("Error fetching events:", error);
       }
-    }
-
-    // Only attempt to load events once we have a session
-    if (session) {
+    };
+    
+    if (session?.user.id) {
       fetchEvents();
+    } else {
+      console.log("No user session found");
     }
-  }, [session]);
+  }, [session?.user.id]);
 
   // Compute start of the visible week
   const startOfReferenceWeek = useMemo(
@@ -108,11 +87,11 @@ export function WeekGridClient() {
 
       {/* Main scrollable area */}
       <div className="flex-1 overflow-y-scroll custom-scrollbar select-none">
-        <div className="flex flex-1 h-[1920px] cursor-grab active:cursor-grabbing">
+        <div className="flex flex-1 h-[1440px] cursor-grab active:cursor-grabbing">
           {/* Time labels */}
           <div className="w-[72px] flex-none border-r border-[#303030] sticky left-0 bg-[#242424]">
             {timeSlots.map((hour) => (
-              <div key={hour} className="relative h-[80px]">
+              <div key={hour} className="relative h-[60px]">
                 <div className="absolute -top-2 left-2 text-sm text-gray-500">
                   {formatTime(hour)}
                 </div>
@@ -130,13 +109,13 @@ export function WeekGridClient() {
                 {timeSlots.map((hour) => (
                   <div
                     key={hour}
-                    className="h-[80px] border-b border-[#303030] relative"
+                    className="h-[60px] border-b border-[#303030] relative"
                   />
                 ))}
 
                 {/* Render events for this day */}
                 {events
-                  .filter((event) => isSameDay(event.start, day))
+                  .filter((event) => isSameDay(event.start_time, day))
                   .map((event) => (
                     <EventCard key={event.id} event={event} />
                   ))}

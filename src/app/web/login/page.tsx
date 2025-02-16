@@ -1,6 +1,6 @@
 import LoginForm from "@/components/login-form/LoginForm";
 
-export default async function LandingPage() {
+const LandingPage = () => {
   return (
     <div className="min-h-screen flex">
       <div className="w-1/2 flex items-center justify-center bg-gray-900">
@@ -10,3 +10,5 @@ export default async function LandingPage() {
     </div>
   );
 }
+
+export default LandingPage;

@@ -9,6 +9,7 @@ export interface ExtendedSession extends Session {
         image?: string | null;
         accessToken?: string;
         refreshToken?: string;
+        googleId?: string;
     }
 }
 

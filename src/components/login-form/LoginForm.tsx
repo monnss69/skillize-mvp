@@ -1,14 +1,28 @@
 "use client";
 
-import { signIn, signOut, useSession } from 'next-auth/react';
+import React, { useEffect, useState } from 'react';
+import { signIn, useSession } from 'next-auth/react';
 import { Button } from "../ui/Button";
 import { FcGoogle } from 'react-icons/fc';
-import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export default function LoginForm() {
   const { data: session } = useSession();
+  const router = useRouter();
+  const [credentials, setCredentials] = useState({
+    email: '',
+    password: '',
+  });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignIn = () => {
+  useEffect(() => {
+    if (session) {
+      router.push('/web/calendar');
+    }
+  }, [session, router]);
+
+  const handleGoogleSignIn = () => {
     signIn('google', {
       callbackUrl: '/web/calendar',
       prompt: 'select_account',
@@ -20,37 +34,34 @@ export default function LoginForm() {
     });
   }
 
-  if (session) {
-    return (
-      <div className="w-full max-w-md p-8 space-y-6 bg-white/5 backdrop-blur-lg rounded-xl border border-gray-700 shadow-2xl">
-        <div className="flex flex-col items-center space-y-4">
-          {session.user?.image && (
-            <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-primary">
-              <Image
-                src={session.user.image}
-                alt="Profile"
-                fill
-                className="object-cover"
-              />
-            </div>
-          )}
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-white">Welcome back!</h2>
-            <p className="text-gray-400 mt-1">{session.user?.email}</p>
-          </div>
-        </div>
-        
-        <Button
-          onClick={() => signOut({ callbackUrl: '/web/login' })}
-          className="w-full"
-          variant="gradient"
-          size="lg"
-        >
-          Sign Out
-        </Button>
-      </div>
-    );
-  }
+  const handleCredentialsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCredentials({ ...credentials, [e.target.name]: e.target.value });
+  };
+
+  const handleCredentialsSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const res = await signIn('credentials', {
+        redirect: false,
+        email: credentials.email,
+        password: credentials.password,
+        callbackUrl: '/web/calendar',
+      });
+
+      if (res?.error) {
+        setError(res.error);
+      } else {
+        router.push('/web/calendar');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-md p-8 space-y-8 bg-white/5 backdrop-blur-lg rounded-xl border border-gray-700 shadow-2xl">
@@ -59,15 +70,37 @@ export default function LoginForm() {
         <p className="text-gray-400">Sign in to continue to your account</p>
       </div>
 
-      <Button
-        onClick={() => handleSignIn()}
-        className="w-full group relative"
-        variant="gradient"
-        size="lg"
-      >
-        <FcGoogle className="absolute left-4 w-5 h-5" />
-        <span>Continue with Google</span>
-      </Button>
+      {error && <p className="text-red-500 text-center">{error}</p>}
+
+      <form onSubmit={handleCredentialsSignIn} className="space-y-4">
+        <div>
+          <label className="block text-gray-300">Email</label>
+          <input
+            name="email"
+            type="email"
+            required
+            value={credentials.email}
+            onChange={handleCredentialsChange}
+            className="w-full p-2 rounded-md border border-gray-600 bg-gray-800 text-white"
+            placeholder="your-email@example.com"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-300">Password</label>
+          <input
+            name="password"
+            type="password"
+            required
+            value={credentials.password}
+            onChange={handleCredentialsChange}
+            className="w-full p-2 rounded-md border border-gray-600 bg-gray-800 text-white"
+            placeholder="Your password"
+          />
+        </div>
+        <Button type="submit" isLoading={isLoading} className="w-full" variant="gradient" size="lg">
+          Sign In
+        </Button>
+      </form>
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
@@ -78,7 +111,19 @@ export default function LoginForm() {
         </div>
       </div>
 
-      {/* Add more auth providers here if needed */}
+      <Button
+        onClick={handleGoogleSignIn}
+        className="w-full group relative"
+        variant="gradient"
+        size="lg"
+      >
+        <FcGoogle className="absolute left-4 w-5 h-5" />
+        <span>Continue with Google</span>
+      </Button>
+
+      <div className="text-center text-gray-400">
+        Don&apos;t have an account? <a href="/web/signup" className="underline">Sign Up</a>
+      </div>
     </div>
   );
 }

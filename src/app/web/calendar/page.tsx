@@ -1,17 +1,28 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { CalendarSidebar } from "@/components/calendar/week-view/CalendarSidebar";
 import { ActionPanel } from "@/components/calendar/week-view/ActionPanel";
+import { syncCalendar } from "./actions";
 import { WeekGridClient } from "@/components/calendar/week-view/WeekGridClient";
-
-export const revalidate = Infinity;
-
+import Loading from "./loading";  
 // Server component
-export default function CalendarPage() {
+const CalendarPage = async () => {
+  try {
+    await syncCalendar();
+  } catch (error) {
+    console.error('Failed to sync calendar:', error);
+    // You might want to add error handling UI here
+    return <div>Failed to sync calendar</div>;
+  }
+
   return (
     <div className="flex h-screen w-screen bg-background overflow-hidden">
       <CalendarSidebar className="w-[18.44vw] border-r border-[#303030]" />
-      <WeekGridClient />
+      <Suspense fallback={<Loading />}>
+        <WeekGridClient />
+      </Suspense>
       <ActionPanel className="w-[18.06vw] border-l border-[#303030] border-border" />
     </div>
   );
 }
+
+export default CalendarPage;

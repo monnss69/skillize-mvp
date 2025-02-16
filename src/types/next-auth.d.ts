@@ -9,6 +9,8 @@ declare module "next-auth" {
       image?: string | null;
       accessToken?: string | null;
       refreshToken?: string | null;
+      timezone?: string;
+      googleId?: string;
     };
   }
 
@@ -18,5 +20,6 @@ declare module "next-auth" {
     refreshToken?: string | null;
     accessTokenExpires?: number;
     error?: string;
+    googleId?: string;
   }
 } 
