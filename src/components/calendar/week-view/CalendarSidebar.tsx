@@ -4,7 +4,7 @@ import { useState } from "react";
 import { GoogleLinkButton } from "@/components/account/GoogleLinkButton";
 import { Plus } from "lucide-react";
 import { CreateEventModal } from "./components/create-event-modal/CreateEventModal";
-import SidebarButton from "@/components/ui/SidebarButton";
+import { Button } from "@/components/ui/button";
 
 /**
  * CalendarSidebar Component
@@ -20,17 +20,19 @@ export function CalendarSidebar({ className }: { className?: string }) {
 
   return (
     <>
-      <div className={`bg-[#1A1A1A] text-gray-300 p-4 flex flex-col gap-4 ${className}`}>
+      <div className={`bg-[#1A1A1A] text-gray-300 p-4 flex flex-col-reverse gap-4 ${className}`}>
         {/* Google Account Linking Button */}
         <GoogleLinkButton />
 
         {/* Create Event Button */}
-        <SidebarButton
+        <Button
           onClick={() => setIsModalOpen(true)}
+          variant="outline"
+          className="text-gray-300 bg-black border-gray-400"
         >
           <span>Create Event</span>
           <Plus className="h-5 w-5" />
-        </SidebarButton>
+        </Button>
       </div>
 
       <CreateEventModal 

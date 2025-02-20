@@ -16,6 +16,25 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Skillize - Personalized AI Scheduler",
   description: "Skillize is a personalized AI scheduler that helps you schedule your time effectively.",
+  icons: {
+    icon: [
+      { rel: 'icon', url: '/favicon.ico' },
+      { rel: 'icon', url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+      { rel: 'icon', url: '/favicon.svg', type: 'image/svg+xml' }
+    ],
+    shortcut: [{ url: '/favicon.ico' }],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180' }],
+    other: [
+      { rel: 'apple-touch-icon', url: '/apple-touch-icon.png' },
+      { rel: 'manifest', url: '/site.webmanifest' }
+    ]
+  },
+  manifest: '/site.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Skillize'
+  },
 };
 
 export default function RootLayout({

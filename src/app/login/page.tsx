@@ -110,7 +110,7 @@ export default function LoginPage() {
         />
       </div>
 
-      <div className="relative z-10 w-full max-w-sm md:max-w-3xl px-4 rounded-lg">
+      <div className="relative z-10 w-full max-w-xl md:max-w-xl px-4 rounded-lg">
         <LoginForm />
       </div>
 

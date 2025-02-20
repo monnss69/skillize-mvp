@@ -14,7 +14,7 @@ export function GoogleLinkButton() {
     try {
       await signIn('google', {
         redirect: false,
-        callbackUrl: '/web/settings',
+        callbackUrl: '/calendar',
         prompt: 'consent select_account',
         authorizationParams: {
           access_type: 'offline',
@@ -33,9 +33,9 @@ export function GoogleLinkButton() {
 
   if (isLinked) {
     return (
-      <div className="flex items-center gap-4 p-4 bg-green-900/20 rounded-lg">
+      <div className="flex items-center gap-4 p-4 bg-black border border-gray-400 rounded-lg">
         <FcGoogle className="w-6 h-6" />
-        <p className="text-sm text-green-400">Google Account Linked</p>
+        <p className="text-sm text-white">Account Linked</p>
       </div>
     );
   }
@@ -44,7 +44,7 @@ export function GoogleLinkButton() {
     <Button
       onClick={handleGoogleLink}
       disabled={isLinking}
-      className="w-full group relative"
+      className="w-full group relative bg-black border border-gray-400"
       variant="outline"
       size="lg"
     >
