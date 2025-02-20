@@ -3,9 +3,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { CalendarEvent } from "@/types";
-import { format, startOfWeek, addDays, isSameDay } from "date-fns";
-import EventCard from "./components/EventCard";
+import { format, startOfWeek, addDays, isSameDay, parseISO } from "date-fns";
+import EventCard from "./components/event/EventCard";
 import { CalendarHeader } from "./components/CalendarHeader";
+
 /**
  * WeekGridClient is a Client Component that:
  * 1. Fetches all events once upon mount using the user's session access token.
@@ -30,6 +31,7 @@ export function WeekGridClient() {
         const data = await response.json();
         setEvents(data.data || []);
       } catch (error) {
+        console.error("Failed to fetch events:", error);
       }
     };
     
@@ -52,15 +54,20 @@ export function WeekGridClient() {
     [startOfReferenceWeek]
   );
 
-  // Utility to format hour labels (e.g. "1AM", "2PM")
+  // Utility to format hour labels (e.g. "1am", "2pm")
   function formatTime(hour: number) {
     return format(new Date().setHours(hour, 0), "ha").toLowerCase();
   }
 
+  // Handle date selection from the date picker
+  const handleDateChange = (date: Date) => {
+    setReferenceDate(date);
+  };
+
   return (
     <div className="flex flex-col w-full h-full bg-[#242424] text-gray-300 font-sans">
       {/* The header handles changing the reference date without refreshing */}
-      <div className="px-4 py-2">
+      <div className="px-4 py-2 flex justify-between items-center">
         <CalendarHeader
           referenceDate={referenceDate}
           onChangeDate={setReferenceDate}

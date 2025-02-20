@@ -1,96 +1,165 @@
-// src/components/signup-form/SignUpForm.tsx
-
 'use client';
-import React, { useState } from 'react';
+
+import { Button } from "@/components/ui/button"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
+import { zodResolver } from "@hookform/resolvers/zod"
+import Link from "next/link"
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/Button';
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { FcGoogle } from 'react-icons/fc';
+import { signIn } from "next-auth/react";
+
+const formSchema = z.object({
+  email: z.string().email(),
+  username: z.string().min(2, "Username must be at least 2 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters long"),
+})
 
 export default function SignUpForm() {
-  const [form, setForm] = useState({
-    email: '',
-    username: '',
-    password: ''
-  });
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const form = useForm<z.infer<typeof formSchema>>({
+    defaultValues: {
+      email: "",
+      username: "",
+      password: "",
+    },
+    resolver: zodResolver(formSchema),
+  })
 
-  // Handle input changes by updating the form state
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleGoogleSignIn = () => {
+    signIn('google', {
+      callbackUrl: '/calendar',
+      prompt: 'select_account',
+      authorizationParams: {
+        access_type: 'offline',
+        prompt: 'consent select_account',
+        scope: 'https://www.googleapis.com/auth/calendar openid profile email',
+      },
+    });
   };
 
-  // Handle form submission for user sign-up
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+        body: JSON.stringify(data)
       });
-      const data = await res.json();
+      const responseData = await res.json();
+      
       if (!res.ok) {
-        setError(data.error || 'Failed to create account');
+        form.setError('root', { message: responseData.error || 'Failed to create account' });
       } else {
-        // On success, redirect to the login page
-        router.push('/web/login');
+        router.push('/login');
       }
     } catch (err) {
-      setError('An unexpected error occurred.');
-    } finally {
-      setIsLoading(false);
+      form.setError('root', { message: 'An unexpected error occurred.' });
     }
-  };
+  }
 
   return (
-    <div className="max-w-md mx-auto p-8 space-y-6 bg-white/5 backdrop-blur-lg rounded-xl border border-gray-700 shadow-2xl">
-      <h2 className="text-2xl font-bold text-center text-white">Sign Up</h2>
-      {error && <p className="text-red-500 text-center">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-gray-300">Email</label>
-          <input
-            name="email"
-            type="email"
-            required
-            value={form.email}
-            onChange={handleChange}
-            className="w-full p-2 rounded-md border border-gray-600 bg-gray-800 text-white"
-            placeholder="your-email@example.com"
-          />
+    <div className="w-screen h-screen flex items-center justify-center bg-black">
+      <div className="w-full h-full grid lg:grid-cols-2">
+        <div className="max-w-xs m-auto w-full flex flex-col items-center">
+          <p className="mt-4 text-xl font-bold tracking-tight text-white">Sign up for Your App</p>
+
+          <Button 
+            className="mt-8 w-full gap-3 border-gray-700 hover:bg-gray-900 text-gray-700 hover:text-white" 
+            variant="outline" 
+            type="button"
+            onClick={handleGoogleSignIn}
+          >
+            <FcGoogle className="mr-2 h-5 w-5" />
+            Continue with Google
+          </Button>
+
+          <div className="my-7 w-full flex items-center justify-center overflow-hidden">
+            <Separator className="flex-1 bg-gray-800"/>
+            <span className="text-sm px-2 text-gray-400">OR</span>
+            <Separator className="flex-1 bg-gray-800"/>
+          </div>
+
+          {form.formState.errors.root && (
+            <p className="text-red-500 text-sm mb-4">{form.formState.errors.root.message}</p>
+          )}
+
+          <Form {...form}>
+            <form className="w-full space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-300">Email</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="email" 
+                        placeholder="Email" 
+                        className="bg-gray-900 text-white border-gray-700" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage className="text-red-400" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-300">Username</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Username" 
+                        className="bg-gray-900 text-white border-gray-700" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage className="text-red-400" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-300">Password</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password" 
+                        placeholder="Password" 
+                        className="bg-gray-900 text-white border-gray-700" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage className="text-red-400" />
+                  </FormItem>
+                )}
+              />
+              <Button 
+                type="submit" 
+                className="w-full bg-blue-600 hover:bg-blue-500 text-white" 
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? "Signing up..." : "Continue with Email"}
+              </Button>
+            </form>
+          </Form>
+
+          <p className="mt-5 text-sm text-center text-gray-400">
+            Already have an account?
+            <Link href="/web/login" className="ml-1 underline text-gray-300 hover:text-white">
+              Log in
+            </Link>
+          </p>
         </div>
-        <div>
-          <label className="block text-gray-300">Username</label>
-          <input
-            name="username"
-            type="text"
-            required
-            value={form.username}
-            onChange={handleChange}
-            className="w-full p-2 rounded-md border border-gray-600 bg-gray-800 text-white"
-            placeholder="Your username"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-300">Password</label>
-          <input
-            name="password"
-            type="password"
-            required
-            value={form.password}
-            onChange={handleChange}
-            className="w-full p-2 rounded-md border border-gray-600 bg-gray-800 text-white"
-            placeholder="Your password"
-          />
-        </div>
-        <Button type="submit" isLoading={isLoading} className="w-full" variant="gradient" size="lg">
-          Sign Up
-        </Button>
-      </form>
+        <div className="bg-gray-900 hidden lg:block" />
+      </div>
     </div>
-  );
+  )
 }

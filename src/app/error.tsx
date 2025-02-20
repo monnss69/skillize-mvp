@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 export default function Error({
   error,
@@ -18,7 +18,7 @@ export default function Error({
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-gray-100">
             Oops! Something went wrong.
           </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 w-full text-sm text-gray-600 dark:text-gray-400">
             Error: {error.message}
           </p>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">

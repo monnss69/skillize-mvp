@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/auth.config";
 
 export async function syncCalendar() {
+    "use server";
+    
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
         throw new Error('Unauthorized');

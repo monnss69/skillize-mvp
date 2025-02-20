@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { signIn, useSession } from 'next-auth/react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { FcGoogle } from 'react-icons/fc';
 
 export function GoogleLinkButton() {

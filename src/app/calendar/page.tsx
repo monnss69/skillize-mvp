@@ -10,8 +10,6 @@ const CalendarPage = async () => {
     await syncCalendar();
   } catch (error) {
     console.error('Failed to sync calendar:', error);
-    // You might want to add error handling UI here
-    return <div>Failed to sync calendar</div>;
   }
 
   return (

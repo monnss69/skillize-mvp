@@ -2,11 +2,17 @@
 
 import React, { useEffect, useState } from 'react';
 import { signIn, useSession } from 'next-auth/react';
-import { Button } from "../ui/Button";
-import { FcGoogle } from 'react-icons/fc';
 import { useRouter } from 'next/navigation';
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { FcGoogle } from 'react-icons/fc';
 
-export default function LoginForm() {
+export default function LoginForm({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<"form">) {
   const { data: session } = useSession();
   const router = useRouter();
   const [credentials, setCredentials] = useState({
@@ -18,13 +24,13 @@ export default function LoginForm() {
 
   useEffect(() => {
     if (session) {
-      router.push('/web/calendar');
+      router.push('/calendar');
     }
   }, [session, router]);
-
+  
   const handleGoogleSignIn = () => {
     signIn('google', {
-      callbackUrl: '/web/calendar',
+      callbackUrl: '/calendar',
       prompt: 'select_account',
       authorizationParams: {
         access_type: 'offline',
@@ -32,13 +38,13 @@ export default function LoginForm() {
         scope: 'https://www.googleapis.com/auth/calendar openid profile email',
       },
     });
-  }
+  };
 
   const handleCredentialsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
   };
 
-  const handleCredentialsSignIn = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
@@ -48,13 +54,13 @@ export default function LoginForm() {
         redirect: false,
         email: credentials.email,
         password: credentials.password,
-        callbackUrl: '/web/calendar',
+        callbackUrl: '/calendar',
       });
 
       if (res?.error) {
         setError(res.error);
       } else {
-        router.push('/web/calendar');
+        router.push('/calendar');
       }
     } catch (err) {
       setError('An unexpected error occurred.');
@@ -64,66 +70,76 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md p-8 space-y-8 bg-white/5 backdrop-blur-lg rounded-xl border border-gray-700 shadow-2xl">
-      <div className="text-center space-y-2">
+    <form 
+      onSubmit={handleSubmit} 
+      className={cn("flex flex-col gap-6 bg-black text-white p-8 rounded-lg border border-gray-700", className)} 
+      {...props}
+    >
+      <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold text-white">Welcome to Skillize</h1>
-        <p className="text-gray-400">Sign in to continue to your account</p>
+        <p className="text-balance text-sm text-gray-400">
+          Enter your email below to login to your account
+        </p>
+        {error && <p className="text-red-500 text-sm">{error}</p>}
       </div>
-
-      {error && <p className="text-red-500 text-center">{error}</p>}
-
-      <form onSubmit={handleCredentialsSignIn} className="space-y-4">
-        <div>
-          <label className="block text-gray-300">Email</label>
-          <input
+      <div className="grid gap-6">
+        <div className="grid gap-2">
+          <Label htmlFor="email" className="text-gray-300">Email</Label>
+          <Input
+            id="email"
             name="email"
             type="email"
+            placeholder="m@example.com"
             required
             value={credentials.email}
             onChange={handleCredentialsChange}
-            className="w-full p-2 rounded-md border border-gray-600 bg-gray-800 text-white"
-            placeholder="your-email@example.com"
+            className="bg-gray-900 text-white border-gray-700"
           />
         </div>
-        <div>
-          <label className="block text-gray-300">Password</label>
-          <input
+        <div className="grid gap-2">
+          <div className="flex items-center">
+            <Label htmlFor="password" className="text-gray-300">Password</Label>
+            <a
+              href="#"
+              className="ml-auto text-sm text-gray-400 underline-offset-4 hover:underline"
+            >
+              Forgot your password?
+            </a>
+          </div>
+          <Input
+            id="password"
             name="password"
             type="password"
             required
             value={credentials.password}
             onChange={handleCredentialsChange}
-            className="w-full p-2 rounded-md border border-gray-600 bg-gray-800 text-white"
-            placeholder="Your password"
+            className="bg-gray-900 text-white border-gray-700"
           />
         </div>
-        <Button type="submit" isLoading={isLoading} className="w-full" variant="gradient" size="lg">
-          Sign In
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? 'Logging in...' : 'Login'}
         </Button>
-      </form>
-
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-gray-700" />
+        <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-gray-700">
+          <span className="relative z-10 bg-black px-2 text-gray-400">
+            Or continue with
+          </span>
         </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-gray-400">Or continue with</span>
-        </div>
+        <Button 
+          type="button"
+          variant="outline" 
+          className="w-full border-gray-700 hover:bg-gray-900 text-gray-700 hover:text-white"
+          onClick={handleGoogleSignIn}
+        >
+          <FcGoogle className="mr-2 h-5 w-5" />
+          Login with Google
+        </Button>
       </div>
-
-      <Button
-        onClick={handleGoogleSignIn}
-        className="w-full group relative"
-        variant="gradient"
-        size="lg"
-      >
-        <FcGoogle className="absolute left-4 w-5 h-5" />
-        <span>Continue with Google</span>
-      </Button>
-
-      <div className="text-center text-gray-400">
-        Don&apos;t have an account? <a href="/web/signup" className="underline">Sign Up</a>
+      <div className="text-center text-sm text-gray-400">
+        Don&apos;t have an account?{" "}
+        <a href="/signup" className="text-white underline underline-offset-4 hover:text-gray-300">
+          Sign up
+        </a>
       </div>
-    </div>
+    </form>
   );
 }

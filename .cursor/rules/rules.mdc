@@ -2,6 +2,8 @@
 description: For every request! Remember these information and integrate them into your answer.
 globs: 
 ---
+NOTES: ALWAYS ADD COMMENT TO THE CODE, NEVER FORGET THIS. ALWAYS ADD COMMENT TO EXPLAIN THE CODE.
+
 /**
  * Database Schema Definitions
  */
