@@ -1,8 +1,11 @@
 ---
 description: For every request! Remember these information and integrate them into your answer.
 globs: 
+alwaysApply: false
 ---
 NOTES: ALWAYS ADD COMMENT TO THE CODE, NEVER FORGET THIS. ALWAYS ADD COMMENT TO EXPLAIN THE CODE.
+
+USING Shadcn or radix UI component as much as possible. USE pnpm as the core package manager
 
 /**
  * Database Schema Definitions
@@ -23,17 +26,20 @@ export const DATABASE_SCHEMA = {
   },
   
   events: {
-    id: 'uuid PRIMARY KEY',
-    user_id: 'uuid REFERENCES users(id)'
-    course_id: 'uuid REFERENCES courses(id)',
-    title: 'varchar NOT NULL',
-    description: 'text',
-    start_time: 'timestamp NOT NULL',
-    end_time: 'timestamp NOT NULL',
-    color: 'varchar',
-    is_completed: 'boolean DEFAULT false',
-    created_at: 'timestamp DEFAULT now()',
-    updated_at: 'timestamp DEFAULT now()'
+    id: string;
+    user_id: string;
+    title: string;
+    description: string | null;
+    start_time: string; // ISO timestamp
+    end_time: string;   // ISO timestamp
+    color: string | null;
+    is_completed: boolean;
+    recurrence_rule: string | null;      // RRULE string (e.g., "FREQ=WEEKLY;COUNT=10")
+    recurrence_exception_dates: string[] | null; // Dates when events are modified/deleted
+    is_recurring: boolean;               // Whether this is a recurring event
+    recurrence_id: string | null;        // Series identifier
+    created_at: string;
+    updated_at: string;
   },
 
   calendars: {

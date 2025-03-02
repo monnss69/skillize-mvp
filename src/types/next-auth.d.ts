@@ -21,5 +21,6 @@ declare module "next-auth" {
     accessTokenExpires?: number;
     error?: string;
     googleId?: string;
+    timezone?: string;
   }
 } 

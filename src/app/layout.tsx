@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../styles/globals.css";
-import { NextAuthProvider } from "./next-auth-provider";
+import { NextAuthProvider } from "@/providers/next-auth-provider";
+import { Toaster } from "sonner";
+import { ReactQueryProvider } from "@/providers/react-query-provider";
+import { GoogleConnectionProvider } from '@/contexts/GoogleConnectionContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,9 +51,14 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${geistSans.className} antialiased`}
       >
-        <NextAuthProvider>
-          {children}
-        </NextAuthProvider>
+        <ReactQueryProvider>
+          <NextAuthProvider>
+            <GoogleConnectionProvider>
+              <Toaster richColors />
+              {children}
+            </GoogleConnectionProvider>
+          </NextAuthProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );

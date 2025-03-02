@@ -1,21 +1,39 @@
-export interface CalendarEvent {
-  id: string;
-  title: string;
-  start_time: Date;
-  end_time: Date;
-  color: string;
-  calendar?: string;
-}
-
-export interface Calendar {
-  id: string;
-  name: string;
-  color: string;
-  type: 'personal' | 'work' | 'custom';
-}
-
 export interface TimeSlot {
   start: Date;
   end: Date;
-  events: CalendarEvent[];
+  events: Event[];
+}
+
+export interface RecurrenceRule {
+  frequency: 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
+  interval: number;
+  count: number | null;
+  until: Date | null;
+}
+
+export interface DeleteEvent {
+  id: string;
+}
+
+export interface UpdateEvent {
+  id: string;
+  title?: string;
+  description?: string;
+  start_time?: Date;
+  end_time?: Date;
+  color?: string;
+  is_recurring?: boolean;
+  recurrence_rule?: string;
+  recurrence_exception_dates?: string[];
+}
+
+export interface CreateEvent {
+  title: string;
+  description?: string;
+  start_time: Date;
+  end_time: Date;
+  color?: string;
+  is_recurring?: boolean;
+  recurrence_rule?: string;
+  recurrence_exception_dates?: string[];
 }

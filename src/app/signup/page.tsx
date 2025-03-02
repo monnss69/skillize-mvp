@@ -1,6 +1,6 @@
 "use client";
 
-import SignUpForm from '@/components/signup-form/SignUpForm';
+import SignUpForm from '@/components/form/signup-form/SignUpForm';
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 

@@ -1,32 +1,19 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/auth.config";
+import { syncGoogleCalendar } from "@/lib/actions/calendar";
 
 export async function syncCalendar() {
-    "use server";
-    
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-        throw new Error('Unauthorized');
-    }
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/sync`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            userId: session.user.id,
-            accessToken: session.user.accessToken,
-        }),
-    });
-    
-    if (!response.ok) {
-        const error = await response.json();
+    try {
+        const result = await syncGoogleCalendar();
+        
+        if (!result.success) {
+            throw new Error(result.error || 'Failed to sync calendar');
+        }
+        
+        return result;
+    } catch (error: any) {
+        console.error('Error syncing calendar:', error);
         throw new Error(error.message || 'Failed to sync calendar');
     }
-    
-    return response.json();
 }
 
