@@ -406,148 +406,146 @@ export function EventCreationForm() {
 
 ### Authentication State Flow
 
-```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '16px', 'primaryColor': '#f97316', 'primaryTextColor': '#fff', 'primaryBorderColor': '#f97316', 'lineColor': '#fb923c', 'tertiaryColor': '#7c2d12' }}}%%
-sequenceDiagram
-    participant User as 👤 User
-    participant Auth as 🔒 Auth Component
-    participant NextAuth as 🔐 NextAuth.js
-    participant JWT as 🎟️ JWT Token
-    participant Supabase as 📦 Supabase Auth
-    participant DB as 💾 Database
-
-    classDef userAction fill:#0ea5e9,stroke:#38bdf8,stroke-width:2px,color:white,font-weight:bold
-    classDef authAction fill:#f97316,stroke:#fb923c,stroke-width:2px,color:white,font-weight:bold
-    classDef dbAction fill:#10b981,stroke:#34d399,stroke-width:2px,color:white,font-weight:bold
-    classDef tokenAction fill:#8b5cf6,stroke:#a78bfa,stroke-width:2px,color:white,font-weight:bold
-    classDef errorAction fill:#ef4444,stroke:#f87171,stroke-width:2px,color:white,font-weight:bold
-    classDef successAction fill:#22c55e,stroke:#4ade80,stroke-width:2px,color:white,font-weight:bold
-
-    User->>Auth: Login Attempt
-    note right of User: Email/Password
-    class User,Auth userAction
-
-    Auth->>NextAuth: signIn() Request
-    class Auth,NextAuth authAction
-
-    NextAuth->>Supabase: Authenticate User
-    class NextAuth,Supabase authAction
-
-    Supabase->>DB: Verify Credentials
-    class Supabase,DB dbAction
-
-    alt Authentication Successful
-        DB->>Supabase: Credentials Valid
-        class DB,Supabase successAction
-        
-        Supabase->>NextAuth: Auth Success
-        class Supabase,NextAuth successAction
-        
-        NextAuth->>JWT: Generate Tokens
-        class NextAuth,JWT tokenAction
-        
-        JWT->>Auth: Store Tokens
-        class JWT,Auth tokenAction
-        
-        Auth->>User: Redirect to Dashboard
-        class Auth,User successAction
-    else Authentication Failed
-        DB->>Supabase: Invalid Credentials
-        class DB,Supabase errorAction
-        
-        Supabase->>NextAuth: Auth Failed
-        class Supabase,NextAuth errorAction
-        
-        NextAuth->>Auth: Error Message
-        class NextAuth,Auth errorAction
-        
-        Auth->>User: Display Error
-        class Auth,User errorAction
-    end
+```
++------+          +-------+          +-----------+          +---------+          +----------+          +----------+
+| User |          | Auth  |          | NextAuth  |          |   JWT   |          | Supabase |          | Database |
+|      |          | Comp  |          |           |          | Tokens  |          |   Auth   |          |          |
++------+          +-------+          +-----------+          +---------+          +----------+          +----------+
+   |                  |                    |                     |                    |                     |
+   | Login Attempt    |                    |                     |                    |                     |
+   |----------------->|                    |                     |                    |                     |
+   | (Email/Password) |                    |                     |                    |                     |
+   |                  |                    |                     |                    |                     |
+   |                  | signIn() Request   |                     |                    |                     |
+   |                  |------------------->|                     |                    |                     |
+   |                  |                    |                     |                    |                     |
+   |                  |                    | Authenticate User   |                    |                     |
+   |                  |                    |------------------->|                     |                     |
+   |                  |                    |                    |                     |                     |
+   |                  |                    |                    | Verify Credentials  |                     |
+   |                  |                    |                    |-------------------->|                     |
+   |                  |                    |                    |                     |                     |
+   |                  |                    |                    |                     |                     |
+   |                  |                    |                    |                     |                     |
+   |                  |                    |                    |                     |                     |
+   |                  |                    |                    |                     |                     |
+   +------------------+--------------------+--------------------+---------------------+---------------------+
+   |                                      AUTH RESULT                                                       |
+   +------------------+--------------------+--------------------+---------------------+---------------------+
+   |                  |                    |                    |                     |                     |
+   |                  |                    |                    |                     | Credentials Valid   |
+   |                  |                    |                    |                     |<----------------    |
+   |                  |                    |                    |                     |                     |
+   |                  |                    |                    | Auth Success        |                     |
+   |                  |                    |                    |<----------------    |                     |
+   |                  |                    |                    |                     |                     |
+   |                  |                    | Generate Tokens    |                     |                     |
+   |                  |                    |-------------------->                     |                     |
+   |                  |                    |                    |                     |                     |
+   |                  | Store Tokens       |                    |                     |                     |
+   |                  |<-------------------+                    |                     |                     |
+   |                  |                    |                    |                     |                     |
+   | Redirect to      |                    |                    |                     |                     |
+   | Dashboard        |                    |                    |                     |                     |
+   |<-----------------|                    |                    |                     |                     |
+   |                  |                    |                    |                     |                     |
+   |                  |                    |                    |                     |                     |
+   +------------------+--------------------+--------------------+---------------------+---------------------+
+   |                                  OR AUTHENTICATION FAILED                                              |
+   +------------------+--------------------+--------------------+---------------------+---------------------+
+   |                  |                    |                    |                     |                     |
+   |                  |                    |                    |                     | Invalid Credentials |
+   |                  |                    |                    |                     |<----------------    |
+   |                  |                    |                    |                     |                     |
+   |                  |                    |                    | Auth Failed         |                     |
+   |                  |                    |                    |<----------------    |                     |
+   |                  |                    |                    |                     |                     |
+   |                  | Error Message      |                    |                     |                     |
+   |                  |<-------------------|                    |                     |                     |
+   |                  |                    |                    |                     |                     |
+   | Display Error    |                    |                    |                     |                     |
+   |<-----------------|                    |                    |                     |                     |
+   |                  |                    |                    |                     |                     |
 ```
 
 ### Calendar Event State Flow
 
-```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '16px', 'primaryColor': '#0ea5e9', 'primaryTextColor': '#fff', 'primaryBorderColor': '#0ea5e9', 'lineColor': '#38bdf8', 'tertiaryColor': '#0c4a6e' }}}%%
-sequenceDiagram
-    participant User as 👤 User
-    participant Calendar as 📅 Calendar UI
-    participant EventForm as 📝 Event Form
-    participant ReactQuery as 🔄 React Query
-    participant ServerAction as ⚡ Server Action
-    participant DB as 💾 Database
-    participant Google as 🌐 Google Calendar
-
-    classDef userAction fill:#0ea5e9,stroke:#38bdf8,stroke-width:2px,color:white,font-weight:bold
-    classDef formAction fill:#f59e0b,stroke:#fbbf24,stroke-width:2px,color:white,font-weight:bold
-    classDef queryAction fill:#8b5cf6,stroke:#a78bfa,stroke-width:2px,color:white,font-weight:bold
-    classDef serverAction fill:#3b82f6,stroke:#60a5fa,stroke-width:2px,color:white,font-weight:bold
-    classDef dbAction fill:#10b981,stroke:#34d399,stroke-width:2px,color:white,font-weight:bold
-    classDef googleAction fill:#ef4444,stroke:#f87171,stroke-width:2px,color:white,font-weight:bold
-    classDef successAction fill:#22c55e,stroke:#4ade80,stroke-width:2px,color:white,font-weight:bold
-
-    User->>Calendar: Open Calendar
-    class User,Calendar userAction
-    
-    Calendar->>ReactQuery: Request Events
-    class Calendar,ReactQuery queryAction
-    
-    ReactQuery->>ServerAction: fetchEvents()
-    class ReactQuery,ServerAction queryAction
-    
-    ServerAction->>DB: Query Events
-    class ServerAction,DB serverAction
-    
-    DB->>ServerAction: Return Events Data
-    class DB,ServerAction dbAction
-    
-    ServerAction->>ReactQuery: Events Data
-    class ServerAction,ReactQuery queryAction
-    
-    ReactQuery->>Calendar: Update UI with Events
-    class ReactQuery,Calendar queryAction
-    
-    User->>Calendar: Create New Event
-    class User,Calendar userAction
-    
-    Calendar->>EventForm: Open Create Form
-    class Calendar,EventForm formAction
-    
-    User->>EventForm: Fill Event Details
-    class User,EventForm userAction
-    
-    EventForm->>ReactQuery: createEvent() Mutation
-    class EventForm,ReactQuery formAction
-    
-    ReactQuery->>ServerAction: createEvent()
-    class ReactQuery,ServerAction queryAction
-    
-    ServerAction->>DB: Insert Event
-    class ServerAction,DB dbAction
-    
-    DB->>ServerAction: Return New Event
-    class DB,ServerAction dbAction
-    
-    alt Google Calendar Sync Enabled
-        ServerAction->>Google: Sync Event to Google
-        class ServerAction,Google googleAction
-        
-        Google->>ServerAction: Confirm Sync
-        class Google,ServerAction googleAction
-    end
-    
-    ServerAction->>ReactQuery: Update Cache Optimistically
-    class ServerAction,ReactQuery successAction
-    
-    ReactQuery->>Calendar: Show New Event
-    class ReactQuery,Calendar successAction
-    
-    ReactQuery->>EventForm: Close Form
-    class ReactQuery,EventForm successAction
-    
-    EventForm->>User: Confirm Creation
-    class EventForm,User successAction
+```
++------+    +----------+    +-----------+    +--------------+    +---------------+    +----------+    +----------------+
+| User |    | Calendar |    | Event Form|    | React Query  |    | Server Action |    | Database |    | Google Calendar|
+|      |    |   UI     |    |           |    |              |    |               |    |          |    |                |
++------+    +----------+    +-----------+    +--------------+    +---------------+    +----------+    +----------------+
+   |             |               |                  |                   |                  |                 |
+   | Open Cal    |               |                  |                   |                  |                 |
+   |------------>|               |                  |                   |                  |                 |
+   |             |               |                  |                   |                  |                 |
+   |             | Request Events|                  |                   |                  |                 |
+   |             |-------------->|                  |                   |                  |                 |
+   |             |               |                  |                   |                  |                 |
+   |             |               | fetchEvents()    |                   |                  |                 |
+   |             |               |----------------->|                   |                  |                 |
+   |             |               |                  |                   |                  |                 |
+   |             |               |                  | Query Events      |                  |                 |
+   |             |               |                  |------------------>|                  |                 |
+   |             |               |                  |                   |                  |                 |
+   |             |               |                  |                   | Return Events    |                 |
+   |             |               |                  |                   |<-----------------|                 |
+   |             |               |                  |                   |                  |                 |
+   |             |               |                  | Events Data       |                  |                 |
+   |             |               |                  |<------------------|                  |                 |
+   |             |               |                  |                   |                  |                 |
+   |             | Update UI     |                  |                   |                  |                 |
+   |             |<--------------|                  |                   |                  |                 |
+   |             |               |                  |                   |                  |                 |
+   | Create Event|               |                  |                   |                  |                 |
+   |------------>|               |                  |                   |                  |                 |
+   |             |               |                  |                   |                  |                 |
+   |             | Open Form     |                  |                   |                  |                 |
+   |             |-------------->|                  |                   |                  |                 |
+   |             |               |                  |                   |                  |                 |
+   | Fill Details|               |                  |                   |                  |                 |
+   |------------>|               |                  |                   |                  |                 |
+   |             |               |                  |                   |                  |                 |
+   |             |               | Create Mutation  |                   |                  |                 |
+   |             |               |----------------->|                   |                  |                 |
+   |             |               |                  |                   |                  |                 |
+   |             |               |                  | createEvent()     |                  |                 |
+   |             |               |                  |------------------>|                  |                 |
+   |             |               |                  |                   |                  |                 |
+   |             |               |                  |                   | Insert Event     |                 |
+   |             |               |                  |                   |----------------->|                 |
+   |             |               |                  |                   |                  |                 |
+   |             |               |                  |                   | Return New Event |                 |
+   |             |               |                  |                   |<-----------------|                 |
+   |             |               |                  |                   |                  |                 |
+   |             |               |                  |                   |                  |                 |
+   |             |               |                  |                   | [If Sync Enabled]|                 |
+   |             |               |                  |                   |------------------------------+     |
+   |             |               |                  |                   |                  |           |     |
+   |             |               |                  |                   |                  |           |     |
+   |             |               |                  |                   |                  |           |     |
+   |             |               |                  |                   |                  |           |     |
+   |             |               |                  |                   |                  |           |     |
+   |             |               |                  |                   |                  |           v     |
+   |             |               |                  |                   |                  |      Sync Event |
+   |             |               |                  |                   |<---------------------------------  |
+   |             |               |                  |                   |                  |           |     |
+   |             |               |                  |                   |                  |           |     |
+   |             |               |                  |                   |<---------------------------------  |
+   |             |               |                  |                   |                  |     Confirm Sync|
+   |             |               |                  |                   |                  |                 |
+   |             |               |                  | Update Cache      |                  |                 |
+   |             |               |                  |<------------------|                  |                 |
+   |             |               |                  |                   |                  |                 |
+   |             | Show Event    |                  |                   |                  |                 |
+   |             |<--------------|                  |                   |                  |                 |
+   |             |               |                  |                   |                  |                 |
+   |             |               | Close Form       |                   |                  |                 |
+   |             |               |<-----------------|                   |                  |                 |
+   |             |               |                  |                   |                  |                 |
+   |             |               | Confirm Creation |                   |                  |                 |
+   |<----------------------------|                  |                   |                  |                 |
+   |             |               |                  |                   |                  |                 |
 ```
 
 ## State Management Best Practices

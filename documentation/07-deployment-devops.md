@@ -6,37 +6,55 @@ Skillize MVP is designed for modern cloud deployment with a focus on scalability
 
 ## Deployment Architecture
 
-Skillize MVP follows a serverless-first architecture leveraging several cloud services:
+The Skillize MVP utilizes a serverless-first architecture with the following key components:
 
-```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '16px', 'primaryColor': '#3b82f6', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3b82f6', 'lineColor': '#93c5fd', 'tertiaryColor': '#1e3a8a' }}}%%
-flowchart TD
-    classDef gitClass fill:#6366f1,stroke:#818cf8,stroke-width:2px,color:white,font-weight:bold
-    classDef cicdClass fill:#8b5cf6,stroke:#a78bfa,stroke-width:2px,color:white,font-weight:bold
-    classDef vercelClass fill:#0ea5e9,stroke:#38bdf8,stroke-width:2px,color:white,font-weight:bold
-    classDef appClass fill:#0284c7,stroke:#7dd3fc,stroke-width:2px,color:white,font-weight:bold
-    classDef edgeClass fill:#06b6d4,stroke:#22d3ee,stroke-width:2px,color:white,font-weight:bold
-    classDef dbClass fill:#f59e0b,stroke:#fbbf24,stroke-width:2px,color:white,font-weight:bold
-    classDef authClass fill:#f97316,stroke:#fb923c,stroke-width:2px,color:white,font-weight:bold
-    classDef storageClass fill:#22c55e,stroke:#4ade80,stroke-width:2px,color:white,font-weight:bold
-    classDef googleClass fill:#ef4444,stroke:#f87171,stroke-width:2px,color:white,font-weight:bold
-    classDef clientClass fill:#7c3aed,stroke:#8b5cf6,stroke-width:2px,color:white,font-weight:bold
-    
-    subgraph "Infrastructure"
-        A[<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg' width='24'> GitHub Repository]:::gitClass --> B[<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg' width='24'> CI/CD Pipeline]:::cicdClass
-        B --> C[<img src='https://assets.vercel.com/image/upload/v1588805858/repositories/vercel/logo.png' width='24'> Vercel]:::vercelClass
-        C --> D[<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg' width='24'> Next.js Application]:::appClass
-        C -.- E[<img src='https://assets.vercel.com/image/upload/v1588805858/repositories/vercel/logo.png' width='24'> Vercel Edge Functions]:::edgeClass
-        D --> F{<img src='https://supabase.com/favicon/favicon-196x196.png' width='24'> Supabase}:::dbClass
-        F --> G[(<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg' width='24'> PostgreSQL Database)]:::dbClass
-        F --> H[<img src='https://supabase.com/favicon/favicon-196x196.png' width='24'> Supabase Auth]:::authClass
-        F --> I[<img src='https://supabase.com/favicon/favicon-196x196.png' width='24'> Supabase Storage]:::storageClass
-        D --> J[<img src='https://www.gstatic.com/images/branding/product/2x/googleg_48dp.png' width='24'> Google Calendar API]:::googleClass
-    end
-    
-    subgraph "Client"
-        K[<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/chrome/chrome-original.svg' width='24'> User Browser/Device]:::clientClass --> C
-    end
+```
++--------------------------------------------------------------------------------------+
+|                                                                                      |
+|                              DEPLOYMENT ARCHITECTURE                                 |
+|                                                                                      |
++--------------------------------------------------------------------------------------+
+
++-------------------+     +-------------------+     +-------------------+
+|                   |     |                   |     |                   |
+|      GitHub       |     |       CI/CD       |     |      Vercel       |
+|    Repository     |---->|     Pipeline      |---->|    Platform       |
+|                   |     |                   |     |                   |
++-------------------+     +-------------------+     +-------------------+
+                                                            |
+                                                            |
+                                                            v
+                           +------------------------------------------------------+
+                           |                                                      |
+                           |                   CLIENT                             |
+                           |                                                      |
+                           |  +----------------+          +----------------+      |
+                           |  |                |          |                |      |
+                           |  | Browser/Device |<-------->| Next.js App    |      |
+                           |  |                |          |                |      |
+                           |  +----------------+          +----------------+      |
+                           |                                                      |
+                           +------------------------------------------------------+
+                                              |
+                                              |
+                                              v
++-------------------+     +-------------------+     +-------------------+
+|                   |     |                   |     |                   |
+|     Supabase      |     |     NextAuth      |     |  Google Calendar  |
+|     Database      |<--->|                   |     |       API         |
+|                   |     |                   |     |                   |
++-------------------+     +-------------------+     +-------------------+
+        ^                         ^                         ^
+        |                         |                         |
+        |                         |                         |
+        +-----------------------------------------+---------+
+                                                  |
+                                                  |
+                                              +---v---+
+                                              |       |
+                                              | Users |
+                                              |       |
+                                              +-------+
 ```
 
 ### Key Components
@@ -58,40 +76,68 @@ flowchart TD
 
 ## CI/CD Pipeline
 
-The continuous integration and deployment pipeline automates the testing, building, and deployment processes:
+The continuous integration and continuous deployment pipeline for Skillize consists of the following stages:
 
-```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '16px', 'primaryColor': '#8b5cf6', 'primaryTextColor': '#fff', 'primaryBorderColor': '#8b5cf6', 'lineColor': '#a78bfa', 'tertiaryColor': '#4c1d95' }}}%%
-flowchart LR
-    classDef developerClass fill:#0ea5e9,stroke:#38bdf8,stroke-width:2px,color:white,font-weight:bold
-    classDef repoClass fill:#3b82f6,stroke:#60a5fa,stroke-width:2px,color:white,font-weight:bold
-    classDef actionClass fill:#8b5cf6,stroke:#a78bfa,stroke-width:2px,color:white,font-weight:bold
-    classDef ciClass fill:#6366f1,stroke:#818cf8,stroke-width:2px,color:white,font-weight:bold
-    classDef branchClass fill:#f59e0b,stroke:#fbbf24,stroke-width:2px,color:white,font-weight:bold
-    classDef prodClass fill:#ef4444,stroke:#f87171,stroke-width:2px,color:white,font-weight:bold
-    classDef stagingClass fill:#f97316,stroke:#fb923c,stroke-width:2px,color:white,font-weight:bold
-    classDef previewClass fill:#10b981,stroke:#34d399,stroke-width:2px,color:white,font-weight:bold
-    classDef testClass fill:#06b6d4,stroke:#22d3ee,stroke-width:2px,color:white,font-weight:bold
-    
-    A([<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg' width='20'> Developer Commit]):::developerClass --> B([<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg' width='20'> GitHub Repository]):::repoClass
-    B --> C([<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg' width='20'> GitHub Actions]):::actionClass
-    
-    subgraph "CI Pipeline"
-        C --> D([<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg' width='20'> Install Dependencies]):::ciClass
-        D --> E([<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/eslint/eslint-original.svg' width='20'> Lint Code]):::ciClass
-        E --> F([<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' width='20'> Type Check]):::ciClass
-        F --> G([<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jest/jest-plain.svg' width='20'> Run Tests]):::ciClass
-        G --> H([<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg' width='20'> Build Project]):::ciClass
-    end
-    
-    H --> I{Branch?}:::branchClass
-    I -->|main| J([<img src='https://assets.vercel.com/image/upload/v1588805858/repositories/vercel/logo.png' width='20'> Deploy to Production]):::prodClass
-    I -->|develop| K([<img src='https://assets.vercel.com/image/upload/v1588805858/repositories/vercel/logo.png' width='20'> Deploy to Staging]):::stagingClass
-    I -->|feature| L([<img src='https://assets.vercel.com/image/upload/v1588805858/repositories/vercel/logo.png' width='20'> Deploy to Preview]):::previewClass
-    
-    J --> M([<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jest/jest-plain.svg' width='20'> Post-Deployment Tests]):::testClass
-    K --> M
-    L --> M
+```
++-----------------------------------------------------------+
+|                                                           |
+|                     CI/CD PIPELINE                        |
+|                                                           |
++-----------------------------------------------------------+
+
++----------------+     +----------------+     +----------------+
+|                |     |                |     |                |
+|    Developer   |     |     GitHub     |     |    GitHub      |
+|    Commits     |---->|  Repository    |---->|    Actions     |
+|                |     |                |     |                |
++----------------+     +----------------+     +----------------+
+                                                      |
+                                                      |
+                                                      v
+            +----------------------------------------------------+
+            |                                                    |
+            |                  TESTING STAGES                    |
+            |                                                    |
+            |  +------------+  +------------+  +------------+    |
+            |  |            |  |            |  |            |    |
+            |  |   Install  |->|    Lint    |->|    Type    |    |
+            |  | Dependencie|  |    Code    |  |   Check    |    |
+            |  |            |  |            |  |            |    |
+            |  +------------+  +------------+  +------------+    |
+            |        |                                           |
+            |        v                                           |
+            |  +------------+  +------------+                    |
+            |  |            |  |            |                    |
+            |  |    Run     |->|   Build    |                    |
+            |  |   Tests    |  |  Project   |                    |
+            |  |            |  |            |                    |
+            |  +------------+  +------------+                    |
+            |                        |                           |
+            +------------------------|---------------------------+
+                                     |
+                                     v
+           +-----------------+       |       +-----------------+       
+           |                 |       |       |                 |       
+           |  Deploy Preview |<------+------>|  Deploy to Prod |       
+           | (Feature Branch)|               |   (Main Branch) |       
+           |                 |               |                 |       
+           +-----------------+               +-----------------+       
+                  |                                   |               
+                  v                                   v               
+           +-----------------+               +-----------------+       
+           |                 |               |                 |       
+           | Vercel Preview  |               |  Vercel Prod    |       
+           |  Environment    |               |  Environment    |       
+           |                 |               |                 |       
+           +-----------------+               +-----------------+       
+                  |                                   |               
+                  v                                   v               
+           +-----------------+               +-----------------+       
+           |                 |               |                 |       
+           |   QA Testing    |               | Post-Deployment |       
+           |                 |               |    Testing      |       
+           |                 |               |                 |       
+           +-----------------+               +-----------------+       
 ```
 
 ### Pipeline Stages
@@ -213,63 +259,62 @@ supabase/
 
 ## Monitoring and Logging Architecture
 
+The Skillize application uses a comprehensive monitoring and logging architecture:
+
 ```
-                    ┌──────────────────┐                      ┌───────────────────┐
-                    │Client Application│                      │Next.js Server     │
-                    └─────────┬────────┘                      └────────┬──────────┘
-                              │                                        │
-        ┌──────────────┬──────┴──────────┐                   ┌─────────┴─────────┬─────────────┐
-        │              │                 │                   │                   │             │
-        ▼              ▼                 ▼                   ▼                   ▼             ▼
-┌───────────────┐ ┌────────────┐  ┌────────────┐  ┌────────────────┐  ┌───────────────┐ ┌────────────┐
-│Vercel         │ │Core Web    │  │Sentry Error│  │Application Logs │  │API Request    │ │Custom      │
-│Analytics      │ │Vitals      │  │Tracking    │  │                │  │Logs           │ │Metrics     │
-└───────┬───────┘ └────────────┘  └─────┬──────┘  └───────┬────────┘  └───────┬───────┘ └─────┬──────┘
-        │                                │                 │                   │               │
-        │                                │                 └──────┬────────────┘               │
-        │                                │                        ▼                            │
-        │                                │                 ┌────────────┐                      │
-        │                                │                 │Pino Logger │                      │
-        │                                │                 └────────────┘                      │
-        │                                │                        ▲                            │
-        │                                │                        │                            │
-        │                                │                 ┌────────────┐                      │
-        │                                │                 │Database    │                      │
-        │                                │                 │Logs        │                      │
-        │                                │                 └────────────┘                      │
-        │                                │                                                     │
-        │                          ┌─────┴──────┬─────────────┐                               │
-        │                          │            │             │                               │
-        │                          ▼            ▼             ▼                               │
-        │                   ┌────────────┐ ┌────────────┐ ┌────────────┐                     │
-        │                   │Error       │ │Source Maps │ │Error Alerts│                     │
-        │                   │Alerts      │ │            │ │            │                     │
-        │                   └────────────┘ └────────────┘ └─────┬──────┘                     │
-        │                                                       │                             │
-        │                                                       │                             │
-        │                                                       │                             │
-        └────────────────────┐                                  │                             │
-                             ▼                                  ▼                             │
-                      ┌────────────────┐             ┌───────────────────┐                   │
-                      │Alert Thresholds│             │Notifications      │                   │
-                      └───────┬────────┘             └─────────┬─────────┘                   │
-                              │                                │                             │
-                              │                                │                             │
-                              │                                ▼                             │
-                              │                       ┌───────────────────┐                  │
-                              │                       │On-Call Rotation   │                  │
-                              │                       └───────────────────┘                  │
-                              │                                ▲                             │
-                              │                                │                             │
-                              └────────────────────────────────┘                             │
-                                                                                            │
-                                                                                            │
-                              ┌────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-                      ┌────────────────┐
-                      │Alert Thresholds│
-                      └────────────────┘
++--------------------------------------------------------------------------------+
+|                                                                                |
+|                     MONITORING AND LOGGING ARCHITECTURE                        |
+|                                                                                |
++--------------------------------------------------------------------------------+
+
++-------------------+                        +-------------------+
+|                   |      Analytics         |                   |
+|     Client        |----------------------->|  Vercel Analytics |
+|   Application     |                        |                   |
++-------------------+                        +-------------------+
+        |                                             |
+        | Error                                       | Insights &
+        | Events                                      | Performance
+        v                                             v
++-------------------+                        +-------------------+
+|                   |                        |                   |
+|      Sentry       |<---------------------->|   Vercel Logs     |
+|  Error Tracking   |     Error Context      |                   |
++-------------------+                        +-------------------+
+        ^                                             ^
+        |                                             |
+        |                                             |
+        |                                             |
++-------------------+                        +-------------------+
+|                   |    Application Logs    |                   |
+|    Next.js        |----------------------->|     Pino          |
+|    Server         |                        |     Logger        |
++-------------------+                        +-------------------+
+        |                                             |
+        |                                             |
+        v                                             v
++-------------------+                        +-------------------+
+|                   |    Database Logs       |                   |
+|    Supabase       |----------------------->| Database Logger   |
+|                   |                        |                   |
++-------------------+                        +-------------------+
+        |                                             |
+        |                                             |
+        v                                             v
++-------------------+                        +-------------------+
+|                   |                        |                   |
+| Alert Thresholds  |----------------------->|  Alert           |
+|                   |                        |  Notifications    |
++-------------------+                        +-------------------+
+                                                      |
+                                                      |
+                                                      v
+                                             +-------------------+
+                                             |                   |
+                                             |  DevOps Team      |
+                                             |                   |
+                                             +-------------------+
 ```
 
 ### Application Logging
