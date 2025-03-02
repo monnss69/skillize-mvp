@@ -1,4 +1,4 @@
-# SKILLIZE MVP - DATABASE SCHEMA
+# SKILLIZE MVP - DATABASE SCHEMA - DEPRECATED AND NEED TO BE UPDATED
 
 ## Database Overview
 
@@ -10,248 +10,195 @@ The core features supported by our database schema include:
 - OAuth integration with Google Calendar
 - User preferences and settings
 
-## Database Schema Diagram
+## Database Schema Overview
 
-```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '16px', 'primaryColor': '#f59e0b', 'primaryTextColor': '#fff', 'primaryBorderColor': '#f59e0b', 'lineColor': '#fbbf24', 'tertiaryColor': '#7c2d12' }}}%%
-erDiagram
-    users {
-        uuid id PK "User's unique identifier"
-        varchar(255) email UK "User's email address"
-        varchar(255) name "User's full name"
-        timestamp created_at "Account creation timestamp"
-        timestamp updated_at "Last update timestamp"
-    }
+This document outlines the database schema for the Skillize MVP application. The database is designed to support the core features of the application, including user management, event scheduling, OAuth connections, and user preferences.
 
-    events {
-        uuid id PK "Event's unique identifier"
-        uuid user_id FK "References users.id"
-        varchar(255) title "Event title"
-        text description "Event description"
-        timestamp start_at "Event start time"
-        timestamp end_at "Event end time"
-        boolean is_all_day "Whether event is all day"
-        varchar(255) google_event_id "Google Calendar event ID"
-        timestamp created_at "Event creation timestamp"
-        timestamp updated_at "Last update timestamp"
-    }
-
-    oauth_connections {
-        uuid id PK "Connection unique identifier"
-        uuid user_id FK "References users.id"
-        varchar(50) provider "OAuth provider (e.g., 'google')"
-        varchar(255) provider_user_id "User ID from provider"
-        text access_token "Encrypted access token"
-        text refresh_token "Encrypted refresh token"
-        timestamp expires_at "Token expiration timestamp"
-        timestamp last_synced "Last synchronization timestamp"
-        timestamp created_at "Connection creation timestamp"
-        timestamp updated_at "Last update timestamp"
-    }
-
-    preferences {
-        uuid id PK "Preference unique identifier"
-        uuid user_id FK "References users.id"
-        varchar(50) key "Preference key"
-        jsonb value "Preference value in JSON format"
-        timestamp created_at "Setting creation timestamp"
-        timestamp updated_at "Last update timestamp"
-    }
-
-    users ||--o{ events : "creates"
-    users ||--o{ oauth_connections : "connects"
-    users ||--o{ preferences : "configures"
-
-    classDef usersTable fill:#3b82f6,stroke:#60a5fa,stroke-width:2px
-    classDef eventsTable fill:#10b981,stroke:#34d399,stroke-width:2px
-    classDef oauthTable fill:#f97316,stroke:#fb923c,stroke-width:2px
-    classDef prefsTable fill:#8b5cf6,stroke:#a78bfa,stroke-width:2px
-    
-    class users usersTable
-    class events eventsTable
-    class oauth_connections oauthTable
-    class preferences prefsTable
+```
++----------------+       +----------------+       +-------------------+
+|     User       |       |     Event      |       |  OAuthConnection  |
++----------------+       +----------------+       +-------------------+
+| id (PK)        |<----->| id (PK)        |       | id (PK)           |
+| email          |       | title          |       | user_id (FK)      |
+| name           |       | description    |       | provider          |
+| image          |       | start_time     |       | token             |
+| created_at     |       | end_time       |       | refresh_token     |
+| updated_at     |       | location       |       | expires_at        |
+|                |       | user_id (FK)   |       | created_at        |
+|                |       | created_at     |       | updated_at        |
+|                |       | updated_at     |       +-------------------+
+|                |       | calendar_id    |               ^
+|                |       | is_synced      |               |
++----------------+       +----------------+               |
+        ^                                                 |
+        |                                                 |
+        |                                                 |
+        |                +-------------------+            |
+        +--------------->| UserPreferences   |<-----------+
+                         +-------------------+
+                         | id (PK)           |
+                         | user_id (FK)      |
+                         | theme             |
+                         | notifications     |
+                         | calendar_view     |
+                         | calendar_sync     |
+                         | created_at        |
+                         | updated_at        |
+                         +-------------------+
 ```
 
 ## Data Model Visualization
 
-The following diagram shows how the database entities are represented in the application code:
+This diagram illustrates how the database entities are represented in the application code:
 
-```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '16px', 'primaryColor': '#3b82f6', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3b82f6', 'lineColor': '#93c5fd', 'tertiaryColor': '#1e3a8a' }}}%%
-classDiagram
-    direction TB
-    
-    class User {
-        <<Interface>>
-        +string id
-        +string email
-        +string name
-        +Date createdAt
-        +Date updatedAt
-        +getEvents() Event[]
-        +getPreferences() UserPreferences
-        +hasGoogleConnection() boolean
-    }
-    
-    class Event {
-        <<Interface>>
-        +string id
-        +string userId
-        +string title
-        +string? description
-        +Date startAt
-        +Date endAt
-        +boolean isAllDay
-        +string? googleEventId
-        +Date createdAt
-        +Date updatedAt
-        +getUser() User
-        +syncWithGoogle() Promise~void~
-    }
-    
-    class OAuthConnection {
-        <<Interface>>
-        +string id
-        +string userId
-        +string provider
-        +string providerUserId
-        +string accessToken
-        +string? refreshToken
-        +Date expiresAt
-        +Date? lastSynced
-        +Date createdAt
-        +Date updatedAt
-        +getUser() User
-        +isExpired() boolean
-        +refresh() Promise~boolean~
-    }
-    
-    class UserPreferences {
-        <<Interface>>
-        +string id
-        +string userId
-        +Map~string,any~ preferences
-        +Date createdAt
-        +Date updatedAt
-        +getUser() User
-        +getTheme() string
-        +setTheme(theme: string) void
-        +getCalendarView() string
-        +setCalendarView(view: string) void
-    }
-    
-    class GoogleCalendarService {
-        <<Service>>
-        -OAuthConnection connection
-        +constructor(connection: OAuthConnection)
-        +getEvents(startDate: Date, endDate: Date) Promise~Event[]~
-        +createEvent(event: Event) Promise~string~
-        +updateEvent(event: Event) Promise~boolean~
-        +deleteEvent(eventId: string) Promise~boolean~
-        +sync() Promise~SyncResult~
-    }
-    
-    class SyncResult {
-        <<Interface>>
-        +number added
-        +number updated
-        +number deleted
-        +Date syncTime
-    }
-    
-    class EventRepository {
-        <<Repository>>
-        +findById(id: string) Promise~Event~
-        +findByUserId(userId: string) Promise~Event[]~
-        +findByDateRange(userId: string, startDate: Date, endDate: Date) Promise~Event[]~
-        +create(data: CreateEventParams) Promise~Event~
-        +update(id: string, data: UpdateEventParams) Promise~Event~
-        +delete(id: string) Promise~boolean~
-    }
-    
-    class UserRepository {
-        <<Repository>>
-        +findById(id: string) Promise~User~
-        +findByEmail(email: string) Promise~User~
-        +create(data: CreateUserParams) Promise~User~
-        +update(id: string, data: UpdateUserParams) Promise~User~
-        +delete(id: string) Promise~boolean~
-    }
-    
-    User "1" -- "many" Event : creates
-    User "1" -- "many" OAuthConnection : has
-    User "1" -- "1" UserPreferences : has
-    OAuthConnection "1" -- "1" GoogleCalendarService : powers
-    Event -- GoogleCalendarService : syncs with
-    UserRepository -- User : manages
-    EventRepository -- Event : manages
-    GoogleCalendarService -- SyncResult : produces
-    
-    %% Styling
-    class User fill:#3b82f6,stroke:#60a5fa,stroke-width:2px,color:white
-    class Event fill:#10b981,stroke:#34d399,stroke-width:2px,color:white
-    class OAuthConnection fill:#f97316,stroke:#fb923c,stroke-width:2px,color:white
-    class UserPreferences fill:#8b5cf6,stroke:#a78bfa,stroke-width:2px,color:white
-    class GoogleCalendarService fill:#ef4444,stroke:#f87171,stroke-width:2px,color:white
-    class SyncResult fill:#ef4444,stroke:#f87171,stroke-width:2px,color:white
-    class EventRepository fill:#0ea5e9,stroke:#38bdf8,stroke-width:2px,color:white
-    class UserRepository fill:#0ea5e9,stroke:#38bdf8,stroke-width:2px,color:white
+```
++------------------+           +------------------+           +--------------------+
+|      User        |           |      Event       |           |  OAuthConnection   |
++------------------+           +------------------+           +--------------------+
+| id: string       |<--------->| id: string       |           | id: string         |
+| email: string    |           | title: string    |           | userId: string     |
+| name: string     |           | description: str |           | provider: string   |
+| image?: string   |           | startAt: Date    |           | accessToken: string|
+| createdAt: Date  |           | endAt: Date      |           | refreshToken: str  |
+| updatedAt: Date  |           | isAllDay: boolean|           | expiresAt: Date    |
++------------------+           | userId: string   |           | lastSynced: Date   |
+| getEvents()      |           | googleId?: string|           | createdAt: Date    |
+| getPreferences() |           | createdAt: Date  |           | updatedAt: Date    |
+| connectOAuth()   |           | updatedAt: Date  |           +--------------------+
++------------------+           +------------------+           | refreshTokens()    |
+                               | sync()           |           | isExpired(): bool  |
+                               | toGoogleEvent()  |           +--------------------+
+                               +------------------+                     ^
+            ^                                                           |
+            |                                                           |
+            |                                                           |
+            |                   +------------------+                    |
+            +------------------>| UserPreferences  |<-------------------+
+                                +------------------+
+                                | id: string       |
+                                | userId: string   |
+                                | theme: string    |
+                                | notifications:bool|
+                                | calendarView: str|
+                                | calendarSync:bool|
+                                | createdAt: Date  |
+                                | updatedAt: Date  |
+                                +------------------+
+                                | applyTheme()     |
+                                | toggleSync()     |
+                                +------------------+
+
++---------------------+           +---------------------+
+| GoogleCalendarService|           |    SyncResult      |
++---------------------+           +---------------------+
+| credentials: OAuth  |           | success: boolean    |
+| user: User          |           | message: string     |
++---------------------+           | syncedEvents: Event[]|
+| sync(events): Result|---------->| errors: Error[]     |
+| getEvents(): Event[]|           +---------------------+
+| createEvent(Event)  |
+| updateEvent(Event)  |
+| deleteEvent(id)     |
++---------------------+
+
++---------------------+           +---------------------+
+|   EventRepository   |           |   UserRepository    |
++---------------------+           +---------------------+
+| db: Database        |           | db: Database        |
++---------------------+           +---------------------+
+| findAll(): Event[]  |           | findById(id): User  |
+| findByUser(id)      |           | findByEmail(email)  |
+| findById(id): Event |           | create(data): User  |
+| create(data): Event |           | update(id, data)    |
+| update(id, data)    |           | delete(id): boolean |
+| delete(id): boolean |           +---------------------+
++---------------------+
 ```
 
 ## Database and Application Flow
 
 The following diagram illustrates the flow of data between the client, server, and database:
 
-```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '16px', 'primaryColor': '#0ea5e9', 'primaryTextColor': '#fff', 'primaryBorderColor': '#0ea5e9', 'lineColor': '#38bdf8', 'tertiaryColor': '#0c4a6e' }}}%%
-flowchart TD
-    classDef clientClass fill:#8b5cf6,stroke:#a78bfa,stroke-width:2px,color:white,font-weight:bold
-    classDef serverClass fill:#0ea5e9,stroke:#38bdf8,stroke-width:2px,color:white,font-weight:bold
-    classDef dbClass fill:#f59e0b,stroke:#fbbf24,stroke-width:2px,color:white,font-weight:bold
-    classDef googleClass fill:#ef4444,stroke:#f87171,stroke-width:2px,color:white,font-weight:bold
-    
-    Client([<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' width='20'> Client Application]):::clientClass
-    
-    Server([<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg' width='20'> Server API & Actions]):::serverClass
-    
-    DB[(<img src='https://supabase.com/favicon/favicon-196x196.png' width='20'> Supabase Database)]:::dbClass
-    
-    Google([<img src='https://www.gstatic.com/images/branding/product/2x/googleg_48dp.png' width='20'> Google Calendar API]):::googleClass
-    
-    Client -->|1. User Authentication| Server
-    Server -->|2. Validate & Create Session| DB
-    DB -->|3. Return User Data| Server
-    Server -->|4. User Session| Client
-    
-    Client -->|5. Create/Update Event| Server
-    Server -->|6. Store Event Data| DB
-    
-    Client -->|7. Request Google Connection| Server
-    Server -->|8. OAuth Flow| Google
-    Google -->|9. Auth Tokens| Server
-    Server -->|10. Store Tokens| DB
-    
-    Client -->|11. Request Events| Server
-    Server -->|12. Fetch Events| DB
-    Server -->|13. Fetch Google Events| Google
-    Server -->|14. Merge & Return| Client
-    
-    subgraph "Database Tables"
-        Users[<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg' width='20'> users]:::dbClass
-        Events[<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg' width='20'> events]:::dbClass
-        OAuth[<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg' width='20'> oauth_connections]:::dbClass
-        Prefs[<img src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg' width='20'> preferences]:::dbClass
-        
-        Users --- Events
-        Users --- OAuth
-        Users --- Prefs
-    end
-    
-    DB -.- Users
-    DB -.- Events
-    DB -.- OAuth
-    DB -.- Prefs
+```
++---------------------+           +---------------------+           +---------------------+
+|                     |           |                     |           |                     |
+|       CLIENT        |           |       SERVER        |           |      DATABASE       |
+|                     |           |                     |           |                     |
++---------------------+           +---------------------+           +---------------------+
+         |                                  |                                 |
+         |                                  |                                 |
+         |    Authentication Request        |                                 |
+         |--------------------------------->|                                 |
+         |                                  |                                 |
+         |                                  |    Verify User Credentials      |
+         |                                  |-------------------------------->|
+         |                                  |                                 |
+         |                                  |    User Data                    |
+         |                                  |<--------------------------------|
+         |                                  |                                 |
+         |    Auth Tokens / User Data       |                                 |
+         |<---------------------------------|                                 |
+         |                                  |                                 |
+         |                                  |                                 |
+         |    Request Events                |                                 |
+         |--------------------------------->|                                 |
+         |                                  |                                 |
+         |                                  |    Query Events                 |
+         |                                  |-------------------------------->|
+         |                                  |                                 |
+         |                                  |    Events Data                  |
+         |                                  |<--------------------------------|
+         |                                  |                                 |
+         |    Events Data                   |                                 |
+         |<---------------------------------|                                 |
+         |                                  |                                 |
+         |                                  |                                 |
+         |    Create Event                  |                                 |
+         |--------------------------------->|                                 |
+         |                                  |                                 |
+         |                                  |    Insert Event                 |
+         |                                  |-------------------------------->|
+         |                                  |                                 |
+         |                                  |    Event ID                     |
+         |                                  |<--------------------------------|
+         |                                  |                                 |
+         |                                  |                                 |
+         |                                  |                                 |
+         |                                  |    [If Google Calendar Sync]    |
+         |                                  |                                 |
+         |                                  |    Google API Call              |
+         |                                  |-------------+                   |
+         |                                  |             |                   |
+         |                                  |             v                   |
+         |                                  |    +----------------+           |
+         |                                  |    | Google Calendar|           |
+         |                                  |    |     API        |           |
+         |                                  |    +----------------+           |
+         |                                  |             |                   |
+         |                                  |<------------+                   |
+         |                                  |                                 |
+         |                                  |    Update Event (sync status)   |
+         |                                  |-------------------------------->|
+         |                                  |                                 |
+         |    Event Created Confirmation    |                                 |
+         |<---------------------------------|                                 |
+         |                                  |                                 |
+
+Database Tables:
++------------------+    +------------------+    +------------------+    +------------------+
+|      users       |    |      events      |    | oauth_connections|    |    preferences   |
++------------------+    +------------------+    +------------------+    +------------------+
+| id               |    | id               |    | id               |    | id               |
+| email            |    | user_id          |    | user_id          |    | user_id          |
+| name             |    | title            |    | provider         |    | key              |
+| image            |    | description      |    | token            |    | value            |
+| created_at       |    | start_at         |    | refresh_token    |    | created_at       |
+| updated_at       |    | end_at           |    | expires_at       |    | updated_at       |
++------------------+    | is_all_day       |    | created_at       |    +------------------+
+                        | google_event_id  |    | updated_at       |
+                        | created_at       |    +------------------+
+                        | updated_at       |
+                        +------------------+
 ```
 
 ## Table Definitions
