@@ -39,16 +39,16 @@ Base UI components that serve as building blocks for more complex interfaces. Th
 
 #### Key UI Components
 
-| Component | Description | Props | Usage |
-|-----------|-------------|-------|-------|
-| Button | Multi-variant button | variant, size, onClick | Form submissions, actions |
-| Input | Text input field | type, placeholder, onChange | Form inputs |
-| Select | Dropdown selection | options, value, onChange | Option selection |
-| Modal | Dialog overlay | isOpen, onClose | Form dialogs, confirmations |
-| Tabs | Tab navigation | tabs, activeTab | Page section navigation |
-| Avatar | User profile image | src, alt, size | User profiles |
-| Form | Form container | onSubmit, children | Form layout and validation |
-| Toast | Notification messages | type, message | User notifications |
+| Component |      Description      |           Props             | Usage |
+|-----------|-----------------------|-----------------------------|-------|
+|   Button  | Multi-variant button  | variant, size, onClick      | Form submissions, actions |
+|   Input   | Text input field      | type, placeholder, onChange | Form inputs |
+|   Select  | Dropdown selection    | options, value, onChange    | Option selection |
+|   Modal   | Dialog overlay        | isOpen, onClose             | Form dialogs, confirmations |
+|   Tabs    | Tab navigation        | tabs, activeTab             | Page section navigation |
+|   Avatar  | User profile image    | src, alt, size              | User profiles |
+|   Form    | Form container        | onSubmit, children          | Form layout and validation |
+|   Toast   | Notification messages | type, message               | User notifications |
 
 ### 2. Calendar Components
 

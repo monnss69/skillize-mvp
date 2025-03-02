@@ -314,7 +314,21 @@ export const authOptions: NextAuthOptions = {
         }
       }
 
-      return true; // Allow other sign-in methods to proceed
+      if (account?.provider === 'credentials') {
+        try {
+          // Log successful credential-based authentication
+          console.log(`User ${user.email} authenticated with credentials`);
+          
+          // Return true to allow sign in to proceed
+          return true;
+        } catch (error) {
+          console.error('Error in credentials signIn callback:', error);
+          return false;
+        }
+      }
+      
+      // Default return for any other provider
+      return true;
     }
   },
   secret: process.env.NEXTAUTH_SECRET,

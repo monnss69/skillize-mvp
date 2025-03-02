@@ -8,6 +8,7 @@ import { Button } from "@/components/shadcn-ui/button";
 import { Input } from "@/components/shadcn-ui/input";
 import { Label } from "@/components/shadcn-ui/label";
 import { FcGoogle } from 'react-icons/fc';
+import { toast } from "sonner";
 
 export default function LoginForm({
   className,
@@ -38,6 +39,49 @@ export default function LoginForm({
         scope: 'https://www.googleapis.com/auth/calendar openid profile email',
       },
     });
+  };
+
+  const handleCredentialsSignIn = async () => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const res = await signIn('credentials', {
+        redirect: false,
+        email: credentials.email,
+        password: credentials.password,
+        callbackUrl: '/calendar',
+      });
+
+      if (res?.error) {
+        // Handle specific error messages from NextAuth
+        switch (res.error) {
+          case 'Invalid email or password':
+            setError('Email or password is incorrect. Please try again.');
+            break;
+          case 'Invalid authentication method':
+            setError('This account uses a different login method. Try signing in with Google.');
+            break;
+          default:
+            setError(res.error || 'Failed to sign in. Please try again.');
+        }
+      } else if (res?.ok) {
+        // Successful login
+        toast.success("You've successfully logged in.");
+        
+        // Redirect to the callback URL (usually /calendar)
+        if (res.url) {
+          router.push(res.url);
+        } else {
+          router.push('/calendar');
+        }
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('An unexpected error occurred. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCredentialsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,7 +160,7 @@ export default function LoginForm({
             className="bg-gray-900 text-white border-gray-700"
           />
         </div>
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button type="submit" className="w-full" disabled={isLoading} onClick={handleCredentialsSignIn}>
           {isLoading ? 'Logging in...' : 'Login'}
         </Button>
         <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-gray-700">
