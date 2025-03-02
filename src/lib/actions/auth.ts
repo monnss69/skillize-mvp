@@ -1,0 +1,101 @@
+'use server';
+
+import { createClient } from '@/lib/supabase/server';
+import { hash } from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
+import { z } from 'zod';
+import { revalidatePath } from 'next/cache';
+
+/**
+ * Schema for validating signup data
+ */
+const signupSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  username: z.string().min(3, 'Username must be at least 3 characters').max(30, 'Username must be at most 30 characters').optional(),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  timezone: z.string().optional(),
+});
+
+type SignupInput = z.infer<typeof signupSchema>;
+
+/**
+ * Creates a new user account
+ * 
+ * @param input Signup data
+ * @returns Object with success status and message or error
+ */
+export async function signupUser(input: SignupInput) {
+  try {
+    // Validate the input data
+    const validationResult = signupSchema.safeParse(input);
+    if (!validationResult.success) {
+      return {
+        success: false,
+        error: 'Validation failed',
+        details: validationResult.error.format()
+      };
+    }
+    
+    // Get the validated data
+    const { email, username, password, timezone } = validationResult.data;
+    
+    // Initialize Supabase client
+    const supabase = createClient();
+    
+    // Check if user already exists
+    const { data: existingUser, error: fetchError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (existingUser) {
+      return {
+        success: false,
+        error: 'Email already in use',
+      };
+    }
+
+    // Hash password
+    const password_hash = await hash(password, 12);
+
+    // Insert new user
+    const { error } = await supabase
+      .from('users')
+      .insert([
+        {
+          id: uuidv4(),
+          email,
+          username: username || null,
+          password_hash,
+          auth_type: 'local',
+          avatar_url: null,
+          google_id: null,
+          email_verified: false,
+          timezone: timezone || 'Asia/Tokyo', // Default timezone or obtain from user
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ]);
+
+    if (error) {
+      console.error('Error creating user:', error);
+      return {
+        success: false,
+        error: 'Failed to create user',
+        details: error.message
+      };
+    }
+    
+    return {
+      success: true,
+      message: 'User created successfully',
+    };
+  } catch (error) {
+    console.error('Error in signupUser:', error);
+    return {
+      success: false,
+      error: 'Internal server error',
+    };
+  }
+} 
