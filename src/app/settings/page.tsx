@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import SettingsLayout from "@/components/settings/SettingsLayout"
-import ProfileSettings from "@/components/settings/ProfileSettings"
-import AccountSettings from "@/components/settings/AccountSettings"
-import SubscriptionSettings from "@/components/settings/SubscriptionSettings"
+import SettingsLayout from "@/components/settings/settings-layout"
+import ProfileSettings from "@/components/settings/profile-settings"
+import AccountSettings from "@/components/settings/account-settings"
+import SubscriptionSettings from "@/components/settings/subscription-settings"
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("profile")

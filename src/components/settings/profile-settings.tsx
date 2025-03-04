@@ -1,8 +1,9 @@
 'use client'
 
-import UserProfileForm from './UserProfileForm';
+import UserProfileForm from './user-profile-form';
 import { useState, useEffect } from 'react';
 import { useUser } from '@/hooks/use-user';
+import { useUserPreferences } from '@/hooks/use-user-preference';
 
 /**
  * Profile settings container component
@@ -11,16 +12,20 @@ import { useUser } from '@/hooks/use-user';
 export default function ProfileSettings() {
   const [error, setError] = useState<string | null>(null);
   const { data: user, isLoading, error: userError } = useUser();
+  const { data: preferences, isLoading: preferencesLoading, error: preferencesError } = useUserPreferences();
 
   // Handle errors from the hook
   useEffect(() => {
     if (userError) {
       setError(userError.message || 'An error occurred while fetching user data');
     }
-  }, [userError]);
+    if (preferencesError) {
+      setError(preferencesError.message || 'An error occurred while fetching user preferences');
+    }
+  }, [userError, preferencesError]);
   
   // Show loading state
-  if (isLoading) {
+  if (isLoading || preferencesLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#B8A47C]"></div>
@@ -29,7 +34,7 @@ export default function ProfileSettings() {
   }
   
   // Show error state
-  if (error || !user) {
+  if (error || !user || !preferences) {
     return (
       <div className="text-center p-8">
         <h2 className="text-xl text-red-400 mb-4">Something went wrong</h2>
@@ -39,5 +44,5 @@ export default function ProfileSettings() {
   }
   
   // Render the user profile form with the loaded data
-  return <UserProfileForm initialData={user} />;
+  return <UserProfileForm initialData={user} preferences={preferences} />;
 }

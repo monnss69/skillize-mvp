@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/shadcn-ui/button';
 import { Loader2, CheckCircle } from 'lucide-react';
-import { useGoogleConnection } from '@/contexts/GoogleConnectionContext';
+import { useGoogleConnection } from '@/contexts/google-connect-context';
 import { signIn } from 'next-auth/react';
 
 type GoogleConnectButtonProps = {
