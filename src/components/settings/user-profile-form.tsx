@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/shadcn-ui/button';
 import { Input } from '@/components/shadcn-ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/shadcn-ui/form';
@@ -12,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { updateUserProfile } from '@/lib/actions/user';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/shadcn-ui/avatar';
 import { User, UserPreferences } from '@/types';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Loader2 } from 'lucide-react';
 import { TIMEZONES } from '@/lib/constant';
 import { updateUserPreferences } from '@/lib/actions/preferences';
 import { FormTimePicker } from "@/components/ui/form-time-picker";
@@ -53,6 +54,12 @@ type FormValues = z.infer<typeof formUserSchema>;
  */
 export default function UserProfileForm({ initialData, preferences }: { initialData: User, preferences: UserPreferences }) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { data: session } = useSession();
   
   // Initialize the form with React Hook Form and Zod validation
   const form = useForm<FormValues>({
@@ -68,6 +75,171 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
       learning_style: preferences.learning_style || null,
     },
   });
+  
+  /**
+   * Clean up any object URLs when component unmounts
+   */
+  useEffect(() => {
+    return () => {
+      // Clean up any object URLs to avoid memory leaks
+      if (previewUrl && previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  /**
+   * Handle file selection for avatar preview
+   */
+  const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      toast.error("Invalid file type", {
+        description: "Please upload an image file (JPEG, PNG, etc.).",
+      });
+      return;
+    }
+    
+    // Check file size (limit to 3MB)
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("File too large", {
+        description: "Please upload an image smaller than 3MB.",
+      });
+      return;
+    }
+
+    // Create a preview URL
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
+    setPreviewFile(file);
+  };
+
+  /**
+   * Cancel the avatar preview
+   */
+  const cancelPreview = () => {
+    if (previewUrl && previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl(null);
+    setPreviewFile(null);
+    
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  /**
+   * Confirm and upload the previewed avatar
+   */
+  const confirmAndUploadAvatar = async () => {
+    if (!previewFile || !session?.user?.id) return;
+    
+    try {
+      setIsUploading(true);
+      
+      // Create FormData for more efficient file upload
+      const formData = new FormData();
+      formData.append('userId', session.user.id);
+      formData.append('file', previewFile);
+      
+      // Upload to S3
+      const response = await fetch('/api/s3/avatar-upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to upload avatar');
+      }
+      
+      // Generate avatar URL based on user ID
+      // Using the CDN URL pattern for the S3 bucket or direct S3 URL
+      const cdnUrl = process.env.NEXT_PUBLIC_CDN_URL || '';
+      let avatarUrl = '';
+      
+      if (cdnUrl) {
+        // If CDN is configured, use CDN URL pattern
+        avatarUrl = `${cdnUrl}/avatars/${session.user.id}.jpg`;
+      } else {
+        // Fallback to direct S3 URL
+        const bucketName = process.env.NEXT_PUBLIC_S3_BUCKET_NAME || '';
+        const region = process.env.NEXT_PUBLIC_S3_REGION || '';
+        avatarUrl = `https://${bucketName}.s3.${region}.amazonaws.com/avatars/${session.user.id}.jpg`;
+      }
+      
+      // Add cache busting parameter to force refresh
+      avatarUrl = `${avatarUrl}?t=${new Date().getTime()}`;
+      
+      // Update the form value
+      form.setValue('avatar_url', avatarUrl);
+      
+      toast.success("Avatar uploaded", {
+        description: "Your avatar has been updated successfully.",
+      });
+      
+      // Clear the preview after successful upload
+      if (previewUrl && previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
+      }
+      setPreviewUrl(null);
+      setPreviewFile(null);
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      toast.error("Upload failed", {
+        description: error instanceof Error ? error.message : "An error occurred during upload.",
+      });
+    } finally {
+      setIsUploading(false);
+      
+      // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  /**
+   * Handle avatar file upload (for backward compatibility with drag/drop)
+   */
+  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleFileSelection(event);
+  };
+
+  /**
+   * Handle file drop for avatar upload
+   */
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      // Create a mock event for the handleAvatarUpload function
+      const mockEvent = {
+        target: {
+          files: [file]
+        }
+      } as React.ChangeEvent<HTMLInputElement>;
+      
+      handleFileSelection(mockEvent);
+    }
+  }, []);
+  
+  /**
+   * Handle drag events for avatar upload
+   */
+  const handleDragEvents = useCallback((e: React.DragEvent<HTMLDivElement>, isDraggingState: boolean) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(isDraggingState);
+  }, []);
   
   /**
    * Handle form submission using the server action
@@ -166,30 +338,105 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-2xl mx-auto">
         <h2 className="text-2xl font-light text-[#B8A47C] text-center mb-8">Profile Settings</h2>
         
-        {/* Avatar */}
+        {/* Avatar with drag & drop */}
         <div className="flex flex-col items-center justify-center gap-2">
-          <Avatar className="h-40 w-40 border-2 border-[#B8A47C]/20">
-            <AvatarImage 
-              src={form.watch('avatar_url') || initialData.avatar_url || ''}
-              alt={`${form.watch('username') || 'User'}'s avatar`}
-              referrerPolicy="no-referrer"
-              crossOrigin="anonymous"
-            />
-            <AvatarFallback className="text-xl font-medium text-[#B8A47C]">
-              {form.watch('username')?.substring(0, 2)?.toUpperCase() || 'UN'}
-            </AvatarFallback>
-          </Avatar>
+          <div 
+            className={`relative rounded-full cursor-pointer overflow-hidden transition-all duration-200 ${isDragging ? 'ring-4 ring-[#B8A47C] scale-105' : ''}`}
+            onDragOver={(e) => handleDragEvents(e, true)}
+            onDragEnter={(e) => handleDragEvents(e, true)}
+            onDragLeave={(e) => handleDragEvents(e, false)}
+            onDrop={handleDrop}
+            onClick={() => !previewUrl && fileInputRef.current?.click()}
+          >
+            <Avatar className="h-40 w-40 border-2 border-[#B8A47C]/20 relative">
+              {isUploading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full z-10">
+                  <Loader2 className="h-10 w-10 text-[#B8A47C] animate-spin" />
+                </div>
+              )}
+              <AvatarImage 
+                src={previewUrl || form.watch('avatar_url') || initialData.avatar_url || ''}
+              />
+              <AvatarFallback className="text-xl font-medium text-[#B8A47C]">
+                {form.watch('username')?.substring(0, 2)?.toUpperCase() || 'UN'}
+              </AvatarFallback>
+            </Avatar>
+            
+            {/* Drag overlay */}
+            {isDragging && (
+              <div className="absolute inset-0 flex items-center justify-center bg-[#1E2A36]/80 rounded-full z-20">
+                <p className="text-[#B8A47C] text-sm font-medium">Drop to upload</p>
+              </div>
+            )}
+          </div>
           
           {/* Username display */}
           <p className="text-[#E8E2D6] font-medium mt-1">
             {form.watch('username') || 'Username'}
           </p>
 
-          {/* Upload button */}
-          <Button variant="outline" className="bg-[#1E2A36] border-[#2A3A4A] text-[#E8E2D6] mt-2">
-            <Upload className="w-4 h-4 mr-2" />
-            Upload
-          </Button>
+          {/* Hidden file input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept="image/*"
+            onChange={handleFileSelection}
+          />
+
+          {/* Preview controls or Upload button */}
+          {previewUrl ? (
+            <div className="flex gap-2 mt-2">
+              <Button 
+                type="button"
+                variant="default"
+                className="bg-[#B8A47C] hover:bg-[#A89567] text-black"
+                onClick={confirmAndUploadAvatar}
+                disabled={isUploading}
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    Confirm
+                  </>
+                )}
+              </Button>
+              <Button 
+                type="button"
+                variant="outline" 
+                className="bg-[#1E2A36] border-[#2A3A4A] text-[#E8E2D6]"
+                onClick={cancelPreview}
+                disabled={isUploading}
+              >
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <Button 
+              type="button"
+              variant="outline" 
+              className="bg-[#1E2A36] border-[#2A3A4A] text-[#E8E2D6] mt-2"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Upload
+            </Button>
+          )}
+          
+          {previewUrl ? (
+            <p className="text-xs text-gray-400 text-center mt-1">
+              Preview mode - Confirm to save or Cancel to discard
+            </p>
+          ) : (
+            <p className="text-xs text-gray-400 text-center mt-1">
+              Click or drag & drop to change your avatar
+            </p>
+          )}
         </div>
         
         {/* Username field */}
