@@ -8,9 +8,10 @@ export interface Event {
   color: string | null;
   is_completed: boolean;
   recurrence_rule: string | null;      // RRULE string (e.g., "FREQ=WEEKLY;COUNT=10")
-  recurrence_exception_dates: string[] | null; // Dates when events are modified/deleted
   is_recurring: boolean;               // Whether this is a recurring event
   recurrence_id: string | null;        // Series identifier
+  source: string | null;
+  status: "confirmed" | "cancelled",               // Source of the event ('google', 'local', etc.)
   created_at: string;
   updated_at: string;
 }

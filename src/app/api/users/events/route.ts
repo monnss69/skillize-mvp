@@ -37,7 +37,6 @@ export async function POST(req: NextRequest) {
         const color = formData.get('color');
         const is_recurring = formData.get('is_recurring');
         const recurrence_rule = formData.get('recurrence_rule');
-        const recurrence_exception_dates = formData.get('recurrence_exception_dates');
         const original_event_id = formData.get('original_event_id');
         const recurrence_id = formData.get('recurrence_id');
 
@@ -57,7 +56,6 @@ export async function POST(req: NextRequest) {
             is_completed: false,
             is_recurring,
             recurrence_rule,
-            recurrence_exception_dates,
             original_event_id,
             recurrence_id
         });
@@ -169,8 +167,44 @@ export async function DELETE(req: NextRequest) {
         }
 
         const userId = session.user.id;
-
         const supabase = createClient();
+
+        // First, fetch the event to check if it's from Google
+        const { data: eventData, error: eventError } = await supabase
+            .from('events')
+            .select('*')
+            .eq('id', body.id)
+            .eq('user_id', userId)
+            .single();
+
+        if (eventError) {
+            return NextResponse.json({ error: eventError.message }, { status: 500 });
+        }
+
+        if (!eventData) {
+            return NextResponse.json({ error: 'Event not found or not authorized' }, { status: 404 });
+        }
+
+        // Check if the event is from Google Calendar
+        if (eventData.source === 'google' && session.user.accessToken) {
+            // Delete from Google Calendar first
+            const response = await fetch(
+                `https://www.googleapis.com/calendar/v3/calendars/primary/events/${body.id}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        Authorization: `Bearer ${session.user.accessToken}`,
+                    },
+                }
+            );
+            
+            if (response.status !== 204) {
+                console.error('Failed to delete event from Google Calendar:', response.statusText);
+                // Continue with local deletion even if Google deletion fails
+            }
+        }
+
+        // Delete the event from the database
         const { data, error } = await supabase.from('events')
             .delete()
             .eq('user_id', userId)

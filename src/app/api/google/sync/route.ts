@@ -51,23 +51,43 @@ export async function POST(req: NextRequest) {
     const events = data.items.map((event: any) => {
       const isRecurring = Boolean(event.recurrence || event.recurringEventId);
       
-      return {
-        id: event.id,
-        user_id: userId,
-        title: event.summary || 'Untitled Event',
-        description: event.description || null,
-        start_time: event.start.dateTime || event.start.date,
-        end_time: event.end.dateTime || event.end.date,
-        color: event.colorId ? GOOGLE_CALENDAR_COLORS[event.colorId] : '#039be5',
-        is_completed: false,
-        // New recurrence fields
-        recurrence_rule: event.recurrence ? event.recurrence[0] : null, // RRULE string
-        recurrence_exception_dates: event.exdate || null,
-        is_recurring: isRecurring,
-        recurrence_id: event.recurringEventId || (isRecurring ? event.id : null),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      if (event.status === 'confirmed') {
+        return {
+          id: event.id,
+          user_id: userId,
+          title: event.summary || 'Untitled Event',
+          description: event.description || null,
+          start_time: event.start.dateTime || event.start.date,
+          end_time: event.end.dateTime || event.end.date,
+          color: event.colorId ? GOOGLE_CALENDAR_COLORS[event.colorId] : '#039be5',
+          is_completed: false,
+          recurrence_rule: event.recurrence ? event.recurrence[0] : null,
+          is_recurring: isRecurring,
+          recurrence_id: event.recurringEventId || (isRecurring ? event.id : null),
+          source: 'google',
+          status: "confirmed",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+      }
+
+      if (event.status === 'cancelled') {
+        return {
+          id: event.id,
+          user_id: userId,
+          title: event.summary || 'Untitled Event',
+          start_time: event.originalStartTime.dateTime || event.originalStartTime.date,
+          end_time: event.originalStartTime.dateTime || event.originalStartTime.date,
+          is_completed: false,
+          recurrence_rule: null,
+          is_recurring: false,
+          recurrence_id: event.recurringEventId || null,
+          source: 'google',
+          status: "cancelled",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      }
     });
 
     // Upsert events to avoid duplicates

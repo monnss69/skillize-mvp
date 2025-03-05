@@ -17,7 +17,6 @@ import { useEvent } from "@/hooks/use-event";
  * 2. Stores events in React Query cache, preventing re-fetches on next/prev week navigation.
  */
 export function WeekGridClient() {
-  const { data: session } = useSession();
   const [referenceDate, setReferenceDate] = useState(new Date());
   const timeSlots = useMemo(() => Array.from({ length: 24 }, (_, i) => i), []);
 
@@ -35,15 +34,121 @@ export function WeekGridClient() {
     [startOfReferenceWeek]
   );
 
-  // Function to generate week dates
-  const weekDates = useMemo(() => {
-    const startOfCurrentWeek = startOfWeek(referenceDate, { weekStartsOn: 0 });
-    return Array.from({ length: 7 }, (_, i) => addDays(startOfCurrentWeek, i));
-  }, [referenceDate]);
-
   // Format time (e.g., "9 AM", "2 PM")
   function formatTime(hour: number) {
     return format(new Date().setHours(hour, 0, 0, 0), 'h a');
+  }
+
+  /**
+   * Filter and process events for a specific day
+   * @param day The day to get events for
+   * @param allEvents Array of all events
+   * @returns Array of processed events for the specified day
+   */
+  function getEventsForDay(day: Date, allEvents: Event[] = []) {
+    // First, identify all cancelled recurring event instances
+    const cancelledRecurringInstances = allEvents
+      .filter(event => 
+        event.status === "cancelled" && 
+        event.recurrence_id && 
+        event.start_time
+      )
+      .map(event => ({
+        recurringEventId: event.recurrence_id,
+        // Get the start of the cancelled instance to compare dates
+        cancelledDate: new Date(event.start_time)
+      }));
+
+    return allEvents
+      .flatMap((event: Event) => {
+        // Skip cancelled events
+        if (event.status === "cancelled") {
+          return [];
+        }
+
+        // Check if this is a normal event that spans this day
+        const eventStart = new Date(event.start_time);
+        const eventEnd = new Date(event.end_time);
+        const currentDay = new Date(day);
+        
+        // Set time to midnight for date comparison
+        currentDay.setHours(0, 0, 0, 0);
+        const startDay = new Date(eventStart);
+        startDay.setHours(0, 0, 0, 0);
+        const endDay = new Date(eventEnd);
+        endDay.setHours(0, 0, 0, 0);
+        
+        // Regular event that spans this day
+        if (currentDay >= startDay && currentDay <= endDay && !event.recurrence_id) {
+          return [event];
+        }
+        
+        // Handle recurring events
+        if (event.is_recurring && event.recurrence_rule && shouldShowRecurringEvent(event, day)) {
+          // Before generating a recurring instance, check if it's been cancelled
+          const isCancelled = cancelledRecurringInstances.some(cancelled => {
+            
+            if (cancelled.recurringEventId !== event.recurrence_id) {
+              return false;
+            }
+            
+            const cancelledDay = new Date(cancelled.cancelledDate);
+            cancelledDay.setHours(0, 0, 0, 0);
+            
+            return isSameDay(cancelledDay, currentDay);
+          });
+          
+          // Only show if not cancelled
+          if (!isCancelled) {
+            return [generateRecurringEventInstance(event, day)];
+          }
+        }
+        
+        return [];
+      })
+      .map((event: Event) => {
+        // Create a segment of the event for this specific day
+        const eventStart = new Date(event.start_time);
+        const eventEnd = new Date(event.end_time);
+        const currentDay = new Date(day);
+        
+        // If event starts before this day, set start time to beginning of this day
+        if (eventStart < currentDay) {
+          eventStart.setTime(currentDay.getTime());
+          eventStart.setHours(0, 0, 0, 0);
+        }
+
+        // If event ends after this day, set end time to end of this day
+        const nextDay = new Date(currentDay);
+        nextDay.setDate(nextDay.getDate() + 1);
+        nextDay.setHours(0, 0, 0, 0);
+        if (eventEnd > nextDay) {
+          eventEnd.setTime(currentDay.getTime());
+          eventEnd.setHours(23, 59, 59, 999);
+        }
+
+        // Create a modified event object for this day's segment
+        const segmentedEvent = {
+          ...event,
+          start_time: eventStart.toISOString(),
+          end_time: eventEnd.toISOString(),
+          isSegment: true,
+          isStart: isSameDay(eventStart, new Date(event.start_time)),
+          isEnd: isSameDay(eventEnd, new Date(event.end_time)),
+          // Add recurring label if applicable
+          title: event.is_recurring 
+            ? `${event.title}` 
+            : event.title
+        };
+
+        return (
+          <EventCard 
+            key={`${event.id}-${day.toISOString()}`} 
+            event={segmentedEvent} 
+          />
+        );
+      })
+      .filter(Boolean);
   }
 
   return (
@@ -113,74 +218,7 @@ export function WeekGridClient() {
                 ))}
 
                 {/* Render events for this day */}
-                {(events || [])
-                  .flatMap((event: Event) => {
-                    // Check if this is a normal event that spans this day
-                    const eventStart = new Date(event.start_time);
-                    const eventEnd = new Date(event.end_time);
-                    const currentDay = new Date(day);
-                    
-                    // Set time to midnight for date comparison
-                    currentDay.setHours(0, 0, 0, 0);
-                    const startDay = new Date(eventStart);
-                    startDay.setHours(0, 0, 0, 0);
-                    const endDay = new Date(eventEnd);
-                    endDay.setHours(0, 0, 0, 0);
-                    
-                    // Regular event that spans this day
-                    if (currentDay >= startDay && currentDay <= endDay) {
-                      return [event];
-                    }
-                    
-                    // Handle recurring events
-                    if (event.is_recurring && event.recurrence_rule && shouldShowRecurringEvent(event, day)) {
-                      return [generateRecurringEventInstance(event, day)];
-                    }
-                    
-                    return [];
-                  })
-                  .map((event: Event) => {
-                    // Create a segment of the event for this specific day
-                    const eventStart = new Date(event.start_time);
-                    const eventEnd = new Date(event.end_time);
-                    const currentDay = new Date(day);
-                    
-                    // If event starts before this day, set start time to beginning of this day
-                    if (eventStart < currentDay) {
-                      eventStart.setTime(currentDay.getTime());
-                      eventStart.setHours(0, 0, 0, 0);
-                    }
-
-                    // If event ends after this day, set end time to end of this day
-                    const nextDay = new Date(currentDay);
-                    nextDay.setDate(nextDay.getDate() + 1);
-                    nextDay.setHours(0, 0, 0, 0);
-                    if (eventEnd > nextDay) {
-                      eventEnd.setTime(currentDay.getTime());
-                      eventEnd.setHours(23, 59, 59, 999);
-                    }
-
-                    // Create a modified event object for this day's segment
-                    const segmentedEvent = {
-                      ...event,
-                      start_time: eventStart.toISOString(),
-                      end_time: eventEnd.toISOString(),
-                      isSegment: true,
-                      isStart: isSameDay(eventStart, new Date(event.start_time)),
-                      isEnd: isSameDay(eventEnd, new Date(event.end_time)),
-                      // Add recurring label if applicable
-                      title: event.is_recurring 
-                        ? `${event.title}` 
-                        : event.title
-                    };
-
-                    return (
-                      <EventCard 
-                        key={`${event.id}-${day.toISOString()}`} 
-                        event={segmentedEvent} 
-                      />
-                    );
-                  })}
+                {getEventsForDay(day, events || [])}
               </div>
             ))}
           </div>

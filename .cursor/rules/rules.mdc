@@ -1,4 +1,9 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: For every request! Remember these information and integrate them into your answer.
 globs: 
 alwaysApply: false
@@ -35,11 +40,12 @@ export const DATABASE_SCHEMA = {
     color: string | null;
     is_completed: boolean;
     recurrence_rule: string | null;      // RRULE string (e.g., "FREQ=WEEKLY;COUNT=10")
-    recurrence_exception_dates: string[] | null; // Dates when events are modified/deleted
     is_recurring: boolean;               // Whether this is a recurring event
     recurrence_id: string | null;        // Series identifier
     created_at: string;
     updated_at: string;
+    source: "google" | "local"
+    status: "confirmed" | "cancelled"
   },
 
   calendars: {

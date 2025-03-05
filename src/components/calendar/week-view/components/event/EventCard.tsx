@@ -13,7 +13,6 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/shadcn-ui/card";
 import { Event } from "@/types";
 import { Button } from "@/components/shadcn-ui/button";
-import { Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +21,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/shadcn-ui/dialog";
+import { toast } from 'sonner';
+import { addRecurrenceException, deleteEvent } from '@/lib/actions/calendar';
 
 interface EventCardProps {
   event: Event & {
@@ -29,10 +30,9 @@ interface EventCardProps {
     isStart?: boolean;
     isEnd?: boolean;
   };
-  onDeleteEvent?: (eventId: string, deleteAllFuture?: boolean) => void;
 }
 
-export default function EventCard({ event, onDeleteEvent }: EventCardProps) {
+export default function EventCard({ event }: EventCardProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
   const startMinutes = getHours(event.start_time) * 60 + getMinutes(event.start_time);
@@ -51,9 +51,33 @@ export default function EventCard({ event, onDeleteEvent }: EventCardProps) {
 
   const eventColor = event.color || '#039be5';
 
-  const handleDelete = (deleteAllFuture = false) => {
-    if (onDeleteEvent) {
-      onDeleteEvent(event.id, deleteAllFuture);
+  const handleDelete = async (deleteAllFuture = false) => {
+    if (event.is_recurring) {
+      if (deleteAllFuture) {
+        const result = await deleteEvent(event.id.split('-recurring-')[0]);
+
+        if (result.success) {
+          toast.success('Event deleted successfully');
+        } else {
+          toast.error('Failed to delete event');
+        }
+      } else {
+        const result = await addRecurrenceException({id: event.id.split('-recurring-')[0], exception_date: format(event.start_time, 'yyyy-MM-dd')});  
+
+        if (result.success) {
+          toast.success('Event deleted successfully');
+        } else {
+          toast.error('Failed to delete event');
+        }
+      }
+    } else {
+      const result = await deleteEvent(event.id);
+
+      if (result.success) {
+        toast.success('Event deleted successfully');
+      } else {
+        toast.error('Failed to delete event');
+      }
     }
     setDeleteDialogOpen(false);
   };
