@@ -90,6 +90,8 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
 
   /**
    * Handle file selection for avatar preview
+   * @param event - The change event from the file input
+   * @returns void
    */
   const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -206,14 +208,9 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
   };
 
   /**
-   * Handle avatar file upload (for backward compatibility with drag/drop)
-   */
-  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    handleFileSelection(event);
-  };
-
-  /**
    * Handle file drop for avatar upload
+   * @param e - The drag event
+   * @returns void
    */
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -226,7 +223,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
         target: {
           files: [file]
         }
-      } as React.ChangeEvent<HTMLInputElement>;
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
       
       handleFileSelection(mockEvent);
     }
@@ -234,6 +231,9 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
   
   /**
    * Handle drag events for avatar upload
+   * @param e - The drag event
+   * @param isDraggingState - The state of the dragging
+   * @returns void
    */
   const handleDragEvents = useCallback((e: React.DragEvent<HTMLDivElement>, isDraggingState: boolean) => {
     e.preventDefault();
@@ -243,6 +243,8 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
   
   /**
    * Handle form submission using the server action
+   * @param data - The form data
+   * @returns void
    */
   async function onSubmit(data: FormValues) {
     try {
