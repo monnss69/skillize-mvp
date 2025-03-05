@@ -278,4 +278,112 @@ export async function updateCalendarSync(enabled: boolean) {
       error: 'Internal server error',
     };
   }
+}
+
+/**
+ * Schema for validating recurrence exception data
+ */
+const recurrenceExceptionSchema = z.object({
+  id: z.string(),
+  exception_date: z.string().refine(
+    (date) => !isNaN(Date.parse(date)),
+    { message: "Invalid date format" }
+  ),
+});
+
+type RecurrenceExceptionInput = z.infer<typeof recurrenceExceptionSchema>;
+
+/**
+ * Adds an exception date to a recurring event
+ * 
+ * @param input Object containing event id and exception date
+ * @returns Result object with success status
+ */
+export async function addRecurrenceException(input: RecurrenceExceptionInput) {
+  try {
+    // Validate the input data
+    const validationResult = recurrenceExceptionSchema.safeParse(input);
+    if (!validationResult.success) {
+      return {
+        success: false,
+        error: 'Validation failed',
+        details: validationResult.error.format()
+      };
+    }
+
+    // Get the validated data
+    const { id, exception_date } = validationResult.data;
+    
+    // Initialize Supabase client
+    const supabase = createClient();
+    
+    // Get the current user session
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        error: 'Unauthorized',
+      };
+    }
+    
+    // Get the user ID from the session
+    const userId = session.user.id;
+    
+    // Get the event to ensure it exists and belongs to the user
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .single();
+    
+    if (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+    
+    if (!data) {
+      return {
+        success: false,
+        error: 'Event not found or not authorized',
+      };
+    }
+    
+    // Update the event by appending the new exception date to the recurrence_exception_dates array
+    const { error: updateError } = await supabase
+      .from('events')
+      .update({
+        recurrence_exception_dates: supabase.rpc('array_append', {
+          arr: data.recurrence_exception_dates || [],
+          item: exception_date
+        }),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', userId);
+    
+    if (updateError) {
+      return {
+        success: false,
+        error: updateError.message,
+      };
+    }
+    
+    // Revalidate the calendar page to show updated data
+    revalidatePath('/calendar');
+    
+    // Return success response
+    return {
+      success: true,
+      message: 'Exception date added successfully'
+    };
+  } catch (error: any) {
+    console.error('Error in addRecurrenceException:', error);
+    return {
+      success: false,
+      error: error.message || 'Internal server error',
+    };
+  }
 } 

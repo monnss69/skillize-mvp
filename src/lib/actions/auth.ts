@@ -58,13 +58,16 @@ export async function signupUser(input: SignupInput) {
 
     // Hash password
     const password_hash = await hash(password, 12);
+    
+    // Generate a user ID
+    const userId = uuidv4();
 
     // Insert new user
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('users')
-      .insert([
+      .insert(
         {
-          id: uuidv4(),
+          id: userId,
           email,
           username: username || null,
           password_hash,
@@ -72,11 +75,13 @@ export async function signupUser(input: SignupInput) {
           avatar_url: null,
           google_id: null,
           email_verified: false,
-          timezone: timezone || 'Asia/Tokyo', // Default timezone or obtain from user
+          timezone: timezone || 'GMT +00:00', // Default timezone or obtain from user
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
-      ]);
+      )
+      .select('id')
+      .single();
 
     if (error) {
       console.error('Error creating user:', error);
@@ -87,9 +92,29 @@ export async function signupUser(input: SignupInput) {
       };
     }
     
+    // Insert default preferences for the user
+    const { error: preferencesError } = await supabase
+      .from('user_preferences')
+      .insert({
+        user_id: userId,
+        preferred_study_time: {
+          preference: 'afternoon'
+        },
+        study_duration: 25, // Default 25 minutes
+        break_duration: 5,  // Default 5 minutes
+        learning_style: 'visual',
+      });
+      
+    if (preferencesError) {
+      console.error('Error creating default preferences:', preferencesError);
+      // We don't want to fail the signup if preferences creation fails
+      // Just log the error and continue
+    }
+    
     return {
       success: true,
       message: 'User created successfully',
+      userId: userId,
     };
   } catch (error) {
     console.error('Error in signupUser:', error);

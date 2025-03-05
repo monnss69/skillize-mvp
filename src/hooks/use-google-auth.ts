@@ -1,6 +1,6 @@
 'use client';
 
-import { useGoogleConnection } from '@/contexts/GoogleConnectionContext';
+import { useGoogleConnection } from '@/contexts/google-connect-context';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 

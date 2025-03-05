@@ -4,7 +4,7 @@ import "../styles/globals.css";
 import { NextAuthProvider } from "@/providers/next-auth-provider";
 import { Toaster } from "sonner";
 import { ReactQueryProvider } from "@/providers/react-query-provider";
-import { GoogleConnectionProvider } from '@/contexts/GoogleConnectionContext';
+import { GoogleConnectionProvider } from '@/contexts/google-connect-context';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

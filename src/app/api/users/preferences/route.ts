@@ -40,13 +40,14 @@ export async function GET(request: NextRequest) {
         const userId = session.user.id;
 
         const supabase = createClient();
-        const { data, error } = await supabase.from('users').select('preferences').eq('id', userId).single();
+        const { data, error } = await supabase.from('user_preferences').select('*').eq('user_id', userId).single();
 
         if (error) {
+            console.error('Error fetching user preferences:', error);
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json({ preferences: data.preferences }, { status: 200 });
+        return NextResponse.json(data, { status: 200 });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
@@ -76,13 +77,13 @@ export async function PATCH(request: NextRequest) {
         const userId = session.user.id;
 
         const supabase = createClient();
-        const { data, error } = await supabase.from('preferences').update({ preferences: validationResult.data }).eq('user_id', userId).select();
+        const { data, error } = await supabase.from('user_preferences').update(validationResult.data).eq('user_id', userId).select();
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json({ message: 'Preferences updated successfully' }, { status: 200 });
+        return NextResponse.json(data, { status: 200 });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }

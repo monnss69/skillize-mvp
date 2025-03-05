@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/shadcn-ui/button';
 import { Loader2, CheckCircle } from 'lucide-react';
-import { useGoogleConnection } from '@/contexts/GoogleConnectionContext';
+import { useGoogleConnection } from '@/contexts/google-connect-context';
 import { signIn } from 'next-auth/react';
 
 type GoogleConnectButtonProps = {
@@ -29,7 +29,7 @@ export function GoogleConnectButton({
       <Button
         variant="outline"
         size={size}
-        className={className}
+        className={`bg-[#1E2A36] border-[#2A3A4A] text-[#E8E2D6] ${className}`}
         disabled
       >
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -44,7 +44,7 @@ export function GoogleConnectButton({
       <Button
         variant="outline"
         size={size}
-        className={className}
+        className={`bg-[#1E2A36] border-[#2A3A4A] text-[#E8E2D6] ${className}`}
         disabled
       >
         <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
@@ -57,9 +57,9 @@ export function GoogleConnectButton({
   if (isConnected && hasExpiredTokens) {
     return (
       <Button
-        variant={variant}
+        variant="default"
         size={size}
-        className={className}
+        className={`bg-[#B8A47C] hover:bg-[#A89567] text-black ${className}`}
         onClick={handleConnect}
       >
         <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -76,9 +76,9 @@ export function GoogleConnectButton({
   // Default: not connected, show connect button
   return (
     <Button
-      variant={variant}
+      variant="default"
       size={size}
-      className={className}
+      className={`bg-[#B8A47C] hover:bg-[#A89567] text-black ${className}`}
       onClick={handleConnect}
     >
       <svg

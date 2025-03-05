@@ -277,7 +277,7 @@ export const authOptions: NextAuthOptions = {
                 google_id: profile?.sub,
                 avatar_url: user.image,
                 email_verified: true,
-                timezone: 'Asia/Tokyo', // You might want to get this from the client
+                timezone: 'GMT +00:00', // You might want to get this from the client
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
               })
@@ -304,6 +304,13 @@ export const authOptions: NextAuthOptions = {
                 profile_data: profile,
                 calendar_sync_enabled: true,
                 last_synced_at: null,
+              });
+
+            // Insert default preferences for the user
+            await supabase
+              .from('user_preferences')
+              .insert({
+                user_id: newUser.id,
               });
 
             return true;
