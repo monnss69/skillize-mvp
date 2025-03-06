@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { createEvent } from "./actions";
 import { format, addHours, setHours, setMinutes } from "date-fns";
-import { DateTimePicker } from "@/components/calendar/week-view/components/date-picker/DatePicker";
+import { DateTimePicker } from "@/components/calendar/week-view/components/date-picker/date-picker";
 import { ColorPicker } from "@/components/calendar/week-view/components/color-picker/ColorPicker";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -285,6 +285,7 @@ export function CreateEventModal({
                       label="Start Time"
                       initialDate={field.value}
                       onChange={(date) => date && field.onChange(date)}
+                      className="bg-[#0A0F14] border-[#1E2A36] text-[#E8E2D6] focus-visible:ring-[#B8A47C]/30"
                     />
                     <FormMessage className="text-red-400" />
                   </FormItem>
@@ -302,6 +303,7 @@ export function CreateEventModal({
                       label="End Time"
                       initialDate={field.value}
                       onChange={(date) => date && field.onChange(date)}
+                      className="bg-[#0A0F14] border-[#1E2A36] text-[#E8E2D6] focus-visible:ring-[#B8A47C]/30"
                     />
                     <FormMessage className="text-red-400" />
                   </FormItem>

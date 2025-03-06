@@ -6,7 +6,7 @@ import { Event } from "@/types";
 import { 
   format, startOfWeek, addDays, isSameDay,
 } from "date-fns";
-import EventCard from "./components/event/EventCard";
+import EventCard from "./components/event/event-card";
 import { CalendarHeader } from "./components/calendar-props/CalendarHeader";
 import { shouldShowRecurringEvent, generateRecurringEventInstance } from "@/lib/calendar/recurrence";
 import { useEvent } from "@/hooks/use-event";
@@ -162,7 +162,7 @@ export function WeekGridClient() {
       </div>
 
       {/* Status message */}
-      <div className="bg-[#0D1419] p-4 border-b border-[#1E2A36] flex justify-between items-center">
+      <div className="bg-[#0D1419] p-4 border-b border-[#1E2A36] flex justify-between items-center z-40">
         <div className="flex items-center gap-3">
           <div className="h-2 w-2 rounded-full bg-[#B8A47C]"></div>
           <span className="text-sm text-[#E8E2D6] font-light">No upcoming meeting</span>

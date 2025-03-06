@@ -4,7 +4,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { format, addWeeks, startOfToday } from "date-fns";
 import { ChevronLeft, ChevronRight, Clock, Plus } from "lucide-react";
 import { Button } from "@/components/shadcn-ui/button";
-import { CreateEventModal } from "../create-event-modal/CreateEventModal";
+import { CreateEventModal } from "../create-event-modal/create-event-modal";
 
 interface CalendarHeaderProps {
   referenceDate: Date;

@@ -624,3 +624,107 @@ export async function deleteGoogleCalendarEvent(eventId: string) {
     };
   }
 }
+
+const editEventSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  start_time: z.string(),
+  end_time: z.string(),
+  color: z.string(),
+});
+
+type EditEventInput = z.infer<typeof editEventSchema>;
+
+/**
+ * Edits a calendar event
+ * 
+ * @param input Object containing event id and updated data
+ * @returns Result object with success status
+ */
+export async function editEvent(input: EditEventInput) {
+  try {
+    // Validate the input data
+    const validationResult = editEventSchema.safeParse(input);
+    if (!validationResult.success) {
+      return {
+        success: false,
+        error: 'Validation failed',
+      };
+    }
+
+    // Get the validated data
+    const { id, title, description, start_time, end_time, color } = validationResult.data;
+
+    // Initialize Supabase client
+    const supabase = createClient();
+
+    // Get the current user session
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        error: 'Unauthorized',
+      };
+    }
+
+    // Get the user ID from the session
+    const userId = session.user.id;
+
+    // Get the event to ensure it exists and belongs to the user
+    const { data: eventData, error: eventError } = await supabase
+      .from('events')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .single();
+      
+    if (eventError) {
+      return {
+        success: false,
+        error: eventError.message,
+      };
+    }
+
+    if (!eventData) {
+      return {
+        success: false,
+        error: 'Event not found or not authorized',
+      };
+    }
+
+    // Update the event in the database
+    const { data: updatedEvent, error: updateError } = await supabase
+      .from('events')
+      .update({
+        title: title,
+        description: description,
+        start_time: start_time,
+        end_time: end_time,
+        color: color
+      })
+      .eq('id', id)
+      .eq('user_id', userId);
+    
+    if (updateError) {
+      return {
+        success: false,
+        error: updateError.message,
+      };
+    }
+
+    // Revalidate the calendar page to show updated data
+    revalidatePath('/calendar');
+
+    return {
+      success: true,
+      message: 'Event updated successfully',
+    };
+  } catch (error: any) {
+    console.error('Error in editEvent:', error);
+    return {
+      success: false,
+      error: error.message || 'Internal server error',
+    };
+  }
+}
