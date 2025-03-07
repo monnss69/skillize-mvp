@@ -21,6 +21,7 @@ interface DateTimePickerProps {
   onChange: (date: Date | undefined) => void;
   initialDate?: Date;
   showTimeIndicator?: boolean;
+  className?: string;
 }
 
 /**
@@ -38,6 +39,7 @@ export function DateTimePicker({
   label, 
   onChange, 
   initialDate,
+  className,
 }: DateTimePickerProps) {
   const [date, setDate] = React.useState<Date | undefined>(initialDate);
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
@@ -119,18 +121,6 @@ export function DateTimePicker({
     onChange(newDate);
   };
 
-  /**
-   * Calculate the position of the current time indicator
-   */
-  const getCurrentTimePosition = () => {
-    const hours = currentTime.getHours();
-    const minutes = currentTime.getMinutes();
-    // For the time picker, we need to position within the visible height of the calendar
-    // The calendar is approximately 400px high, so we calculate percentage within that
-    // This positions it visually within the calendar days area
-    return (hours * 60 + minutes) * 100 / (24 * 60);
-  };
-
   // Get the corresponding hour or minute values with styling
   const getTimeItemClass = (type: "hour" | "minute" | "ampm", value: string) => {
     if (!date) return "";
@@ -160,8 +150,9 @@ export function DateTimePicker({
         <Button
           variant="outline"
           className={cn(
-            "w-full justify-start text-left font-normal bg-[#0A0F14] border-[#1E2A36] text-[#E8E2D6]",
-            !date && "text-[#8A8578]"
+            "w-full justify-start text-left font-normal text-[#E8E2D6]",
+            !date && "text-[#8A8578]",
+            className
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4 text-[#B8A47C]" />
@@ -172,7 +163,7 @@ export function DateTimePicker({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 bg-[#0D1419] border-[#1E2A36]">
+      <PopoverContent className={cn("w-auto p-0", className)}>
         <div className="sm:flex">
           <div className="relative">
             <Calendar
@@ -183,7 +174,7 @@ export function DateTimePicker({
               className="bg-[#0D1419]"
             />
           </div>
-          <div className="flex flex-col sm:flex-row sm:h-[300px] divide-y sm:divide-y-0 sm:divide-x divide-[#1E2A36]">
+          <div className="flex flex-col sm:flex-row sm:h-[270px] divide-y sm:divide-y-0 sm:divide-x divide-[#1E2A36]">
             <ScrollArea className="w-64 sm:w-auto">
               <div className="flex sm:flex-col p-2">
                 {hours.map((hour) => (
@@ -224,7 +215,7 @@ export function DateTimePicker({
               </div>
               <ScrollBar orientation="horizontal" className="sm:hidden" />
             </ScrollArea>
-            <ScrollArea className="">
+            <ScrollArea className="w-64 sm:w-auto">
               <div className="flex sm:flex-col p-2">
                 {["AM", "PM"].map((ampm) => (
                   <Button

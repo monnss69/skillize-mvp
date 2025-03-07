@@ -1,6 +1,6 @@
 "use server";
 
-import { createCalendarEvent } from '@/lib/actions/calendar';
+import { createEvent as createCalendarEvent } from '@/lib/actions/calendar';
 import { revalidatePath } from "next/cache";
 
 /**
@@ -24,15 +24,19 @@ export async function createEvent(formData: FormData) {
       throw new Error('Missing required fields');
     }
 
-    const result = await createCalendarEvent({
+    // Type assertion to satisfy TypeScript
+    const eventData = {
       title,
       description,
       start_time: startTime,
       end_time: endTime,
       color,
       is_recurring: isRecurring,
-      recurrence_rule: recurrenceRule || undefined
-    });
+      recurrence_rule: recurrenceRule || undefined,
+      source: 'local' // Explicitly set source to local
+    };
+
+    const result = await createCalendarEvent(eventData);
 
     if (!result.success) {
       throw new Error(result.error || 'Failed to create event');

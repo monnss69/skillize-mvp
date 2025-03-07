@@ -24,7 +24,6 @@ export interface UpdateEvent {
   color?: string;
   is_recurring?: boolean;
   recurrence_rule?: string;
-  recurrence_exception_dates?: string[];
 }
 
 export interface CreateEvent {
@@ -35,5 +34,5 @@ export interface CreateEvent {
   color?: string;
   is_recurring?: boolean;
   recurrence_rule?: string;
-  recurrence_exception_dates?: string[];
+  source?: string;
 }

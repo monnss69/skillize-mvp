@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Calendar, Settings, BookOpen, Lightbulb, User, Plus } from "lucide-react";
-import { CreateEventModal } from "./components/create-event-modal/CreateEventModal";
+import { CreateEventModal } from "./components/create-event-modal/create-event-modal";
 import { Button } from "@/components/shadcn-ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/shadcn-ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn-ui/avatar";

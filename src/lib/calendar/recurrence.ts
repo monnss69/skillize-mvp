@@ -105,13 +105,6 @@ export function shouldShowRecurringEvent(
     // Don't show if target date is after the until date
     if (recurrence.until && isBefore(recurrence.until, targetDate)) return false;
 
-    // Check if event is excluded on this date
-    if (event.recurrence_exception_dates?.some(date =>
-        isSameDay(new Date(date), targetDate)
-    )) {
-        return false;
-    }
-
     // Get the day of week code for the target date
     const targetDayCode = getDayOfWeekCode(targetDate.getDay());
 
