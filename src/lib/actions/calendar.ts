@@ -31,7 +31,6 @@ const createEventSchema = z.object({
   color: z.string().default("#2d3748"),
   is_recurring: z.boolean().default(false),
   recurrence_rule: z.string().optional(),
-  original_event_id: z.string().optional(),
   recurrence_id: z.string().optional(),
 });
 

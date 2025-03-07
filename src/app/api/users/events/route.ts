@@ -37,7 +37,6 @@ export async function POST(req: NextRequest) {
         const color = formData.get('color');
         const is_recurring = formData.get('is_recurring');
         const recurrence_rule = formData.get('recurrence_rule');
-        const original_event_id = formData.get('original_event_id');
         const recurrence_id = formData.get('recurrence_id');
 
         if (!userId || !title || !start_time || !end_time) {
@@ -56,8 +55,9 @@ export async function POST(req: NextRequest) {
             is_completed: false,
             is_recurring,
             recurrence_rule,
-            original_event_id,
-            recurrence_id
+            recurrence_id,
+            source: 'local',
+            status: 'confirmed'
         });
 
         console.log(JSON.stringify(data, null, 4));
