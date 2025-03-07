@@ -5,7 +5,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/auth.config';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { toSingaporeISOString } from '@/lib/calendar/date';
 
 /**
  * Type for event operation results that include data

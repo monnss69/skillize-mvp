@@ -24,9 +24,10 @@ import { createPortal } from "react-dom";
 
 interface EventCardProps {
   event: Event & {
-    isSegment?: boolean;
     isStart?: boolean;
     isEnd?: boolean;
+    original_start_time: string;
+    original_end_time: string;
   };
 }
 
@@ -190,11 +191,11 @@ export default function EventCard({ event }: EventCardProps) {
               <CardDescription className="text-slate-400 mt-2 flex items-center">
                 <div className="bg-slate-800/50 px-2 py-1 rounded-md backdrop-blur-sm border border-slate-700/30 text-xs">
                   {event.isStart
-                    ? format(event.start_time, "MMM d • h:mm a")
+                    ? format(event.original_start_time, "MMM d • h:mm a")
                     : "Starts earlier"}
                   {" - "}
                   {event.isEnd
-                    ? format(event.end_time, "h:mm a")
+                    ? format(event.original_end_time, "h:mm a")
                     : "Continues later"}
                 </div>
               </CardDescription>

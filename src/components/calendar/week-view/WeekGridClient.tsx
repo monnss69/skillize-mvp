@@ -111,7 +111,9 @@ export function WeekGridClient() {
         const eventStart = new Date(event.start_time);
         const eventEnd = new Date(event.end_time);
         const currentDay = new Date(day);
-        
+        const originalStartTime = new Date(event.start_time);
+        const originalEndTime = new Date(event.end_time);
+
         // If event starts before this day, set start time to beginning of this day
         if (eventStart < currentDay) {
           eventStart.setTime(currentDay.getTime());
@@ -132,14 +134,17 @@ export function WeekGridClient() {
           ...event,
           start_time: eventStart.toISOString(),
           end_time: eventEnd.toISOString(),
-          isSegment: true,
           isStart: isSameDay(eventStart, new Date(event.start_time)),
           isEnd: isSameDay(eventEnd, new Date(event.end_time)),
+          original_start_time: originalStartTime.toISOString(),
+          original_end_time: originalEndTime.toISOString(),
           // Add recurring label if applicable
           title: event.is_recurring 
             ? `${event.title}` 
             : event.title
         };
+
+        console.log(segmentedEvent);
 
         return (
           <EventCard 

@@ -4,8 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 import { hash } from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
-import { revalidatePath } from 'next/cache';
-
+import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 /**
  * Schema for validating signup data
  */
@@ -123,4 +123,26 @@ export async function signupUser(input: SignupInput) {
       error: 'Internal server error',
     };
   }
-} 
+}
+
+/**
+ * Sign out an user
+ * 
+ * @returns Object with success status and message or error
+ */
+export async function signoutUser() {
+  try {
+    const cookieStore = await cookies();
+    cookieStore.delete('next-auth.session-token');
+    cookieStore.delete('next-auth.csrf-token');
+    cookieStore.delete('next-auth.session-token');
+
+    redirect('/');
+  } catch (error) {
+    console.error('Error in signoutUser:', error);
+    return {
+      success: false,
+      error: 'Internal server error',
+    };
+  }
+}

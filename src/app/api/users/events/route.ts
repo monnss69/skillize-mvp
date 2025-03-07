@@ -8,8 +8,8 @@ const updateEventSchema = z.object({
     id: z.string(),
     title: z.string().optional(),
     description: z.string().optional(),
-    start_time: z.date().optional(),
-    end_time: z.date().optional(),
+    start_time: z.string().optional(),
+    end_time: z.string().optional(),
     color: z.string().optional(),
     is_recurring: z.boolean().optional(),
     recurrence_frequency: z

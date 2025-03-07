@@ -14,7 +14,10 @@ import { Calendar, Clock, Info, Tag, Type, AlignLeft } from "lucide-react"
 import { DateTimePicker } from "@/components/calendar/week-view/components/date-picker/date-picker"
 
 interface EditEventProps {
-  event: Event
+  event: Event & {
+    original_start_time: string
+    original_end_time: string
+  }
   isOpen: boolean
   onClose: () => void
   onSubmit: (eventData: {
@@ -28,14 +31,17 @@ interface EditEventProps {
 }
 
 export default function EditEvent({ event, isOpen, onClose, onSubmit }: EditEventProps) {
+  console.log(event);
   const [formData, setFormData] = useState({
     id: event?.id || "",
     title: event?.title || "",
     description: event?.description || "",
-    start_time: "",
-    end_time: "",
+    start_time: event?.original_start_time || "",
+    end_time: event?.original_end_time || "",
     color: event?.color || "#B8A47C",
   })
+
+  console.log(formData);
   
   const [activeField, setActiveField] = useState<string | null>(null)
   const [animateIn, setAnimateIn] = useState(false)
@@ -61,8 +67,8 @@ export default function EditEvent({ event, isOpen, onClose, onSubmit }: EditEven
         id: event.id,
         title: event.title,
         description: event.description || "",
-        start_time: formatDateForInput(event.start_time),
-        end_time: formatDateForInput(event.end_time),
+        start_time: formatDateForInput(event.original_start_time),
+        end_time: formatDateForInput(event.original_end_time),
         color: event.color || "#B8A47C",
       })
     }
@@ -254,7 +260,7 @@ export default function EditEvent({ event, isOpen, onClose, onSubmit }: EditEven
             </div>
           </div>
 
-          <div className="space-y-2 animate-slide-up" style={{ animationDelay: "250ms" }}>
+          <div className="space-y-2">
             <Label
               htmlFor="color"
               className="text-xs font-medium flex items-center gap-1.5"
