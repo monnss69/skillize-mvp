@@ -109,3 +109,55 @@ export async function updateUserPreferenceField(field: keyof UserPreferencesInpu
   const updateData = { [field]: value } as UserPreferencesInput;
   return updateUserPreferences(updateData);
 }
+
+/**
+ * Gets the current user's preferences
+ * 
+ * @returns Object with success status and preferences data or error
+ */
+export async function getUserPreferences() {
+  try {
+    // Initialize Supabase client
+    const supabase = createClient();
+    
+    // Get the current user session
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return {
+        success: false,
+        error: 'Unauthorized',
+      };
+    }
+    
+    // Get the user ID from the session
+    const userId = session.user.id;
+    
+    // Get the user preferences
+    const { data, error } = await supabase
+      .from('user_preferences')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+    
+    if (error) {
+      console.error('Error getting user preferences:', error);
+      return {
+        success: false,
+        error: 'Failed to get user preferences',
+        details: { message: error.message }
+      };
+    }
+    
+    // Return success response with preferences data
+    return {
+      success: true,
+      preferences: data
+    };
+  } catch (error) {
+    console.error('Error in getUserPreferences:', error);
+    return {
+      success: false,
+      error: 'Internal server error',
+    };
+  }
+}

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { User } from "@/types";
+import { getUserProfile } from "@/lib/actions/user";
 
 export const useUser = () => {
   const { data: session, status: sessionStatus } = useSession();
@@ -12,16 +13,13 @@ export const useUser = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['user', session?.user?.id],
     queryFn: async () => {
-        const response = await fetch('/api/users', {
-            method: 'GET',
-        });
+        const result = await getUserProfile();
         
-        if (!response.ok) {
-          throw new Error('Failed to fetch user data');
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to fetch user data');
         }
         
-       const userData : User = await response.json();
-       return userData;
+       return result.user as User;
     },
     staleTime: 1000 * 60 * 15,
     refetchOnWindowFocus: false,

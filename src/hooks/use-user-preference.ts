@@ -1,6 +1,7 @@
 import { UserPreferences } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
+import { getUserPreferences } from "@/lib/actions/preferences";
 
 export const useUserPreferences = () => {
   const { data: session, status: sessionStatus } = useSession();
@@ -8,16 +9,13 @@ export const useUserPreferences = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['user-preferences', session?.user?.id],
     queryFn: async () => {
-      const response = await fetch('/api/users/preferences', {
-        method: 'GET',
-      });
+      const result = await getUserPreferences();
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch user preferences');
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to fetch user preferences');
       }
 
-      const preferencesData : UserPreferences = await response.json();
-      return preferencesData;
+      return result.preferences as UserPreferences;
     },
     staleTime: 1000 * 60 * 15,
     refetchOnWindowFocus: false,

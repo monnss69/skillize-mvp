@@ -10,13 +10,14 @@ import { Button } from '@/components/shadcn-ui/button';
 import { Input } from '@/components/shadcn-ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/shadcn-ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn-ui/select';
-import { updateUserProfile } from '@/lib/actions/user';
+import { updateUserProfile, uploadAvatar } from '@/lib/actions/user';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/shadcn-ui/avatar';
 import { User, UserPreferences } from '@/types';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { TIMEZONES } from '@/lib/constant';
 import { updateUserPreferences } from '@/lib/actions/preferences';
 import { FormTimePicker } from "@/components/ui/form-time-picker";
+import { useQueryClient } from '@tanstack/react-query';
 
 /**
  * Form schema for updating user profile 
@@ -60,6 +61,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
   
   // Initialize the form with React Hook Form and Zod validation
   const form = useForm<FormValues>({
@@ -136,7 +138,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
   };
 
   /**
-   * Confirm and upload the previewed avatar
+   * Uploads the avatar to S3 and updates the user profile
    */
   const confirmAndUploadAvatar = async () => {
     if (!previewFile || !session?.user?.id) return;
@@ -146,64 +148,37 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
       
       // Create FormData for more efficient file upload
       const formData = new FormData();
-      formData.append('userId', session.user.id);
       formData.append('file', previewFile);
       
-      // Upload to S3
-      const response = await fetch('/api/s3/avatar-upload', {
-        method: 'POST',
-        body: formData,
-      });
+      // Upload to S3 using server action
+      const result = await uploadAvatar(formData);
       
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to upload avatar');
+      if (!result.success) {
+        toast.error("Failed to upload avatar", {
+          description: result.error || "An error occurred during upload",
+        });
+        return;
       }
       
-      // Generate avatar URL based on user ID
-      // Using the CDN URL pattern for the S3 bucket or direct S3 URL
-      const cdnUrl = process.env.NEXT_PUBLIC_CDN_URL || '';
-      let avatarUrl = '';
+      // Update the avatar preview with the new URL
+      form.setValue('avatar_url', result.url);
       
-      if (cdnUrl) {
-        // If CDN is configured, use CDN URL pattern
-        avatarUrl = `${cdnUrl}/avatars/${session.user.id}.jpg`;
-      } else {
-        // Fallback to direct S3 URL
-        const bucketName = process.env.NEXT_PUBLIC_S3_BUCKET_NAME || '';
-        const region = process.env.NEXT_PUBLIC_S3_REGION || '';
-        avatarUrl = `https://${bucketName}.s3.${region}.amazonaws.com/avatars/${session.user.id}.jpg`;
-      }
-      
-      // Add cache busting parameter to force refresh
-      avatarUrl = `${avatarUrl}?t=${new Date().getTime()}`;
-      
-      // Update the form value
-      form.setValue('avatar_url', avatarUrl);
+      // Clear the preview
+      setPreviewFile(null);
       
       toast.success("Avatar uploaded", {
-        description: "Your avatar has been updated successfully.",
+        description: "Your avatar has been updated successfully",
       });
       
-      // Clear the preview after successful upload
-      if (previewUrl && previewUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(previewUrl);
-      }
-      setPreviewUrl(null);
-      setPreviewFile(null);
+      // Refresh the user data
+      await queryClient.invalidateQueries({ queryKey: ['user'] });
     } catch (error) {
-      console.error('Avatar upload error:', error);
+      console.error('Error uploading avatar:', error);
       toast.error("Upload failed", {
-        description: error instanceof Error ? error.message : "An error occurred during upload.",
+        description: "An error occurred during upload",
       });
     } finally {
       setIsUploading(false);
-      
-      // Clear the file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
     }
   };
 

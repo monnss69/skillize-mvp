@@ -726,3 +726,54 @@ export async function editEvent(input: EditEventInput) {
     };
   }
 }
+
+/**
+ * Gets all events for the current user
+ * 
+ * @returns Result object with success status and events data
+ */
+export async function getEvents(): Promise<EventResult<any[]>> {
+  try {
+    // Initialize Supabase client
+    const supabase = createClient();
+    
+    // Get the current user session
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return {
+        success: false,
+        error: 'Unauthorized',
+      };
+    }
+    
+    // Get the user ID from the session
+    const userId = session.user.id;
+    
+    // Get all events for the user
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('user_id', userId);
+    
+    if (error) {
+      console.error('Error getting events:', error);
+      return {
+        success: false,
+        error: 'Failed to get events',
+        details: { message: error.message }
+      };
+    }
+    
+    // Return success response with events data
+    return {
+      success: true,
+      data
+    };
+  } catch (error) {
+    console.error('Error in getEvents:', error);
+    return {
+      success: false,
+      error: 'Internal server error',
+    };
+  }
+}
