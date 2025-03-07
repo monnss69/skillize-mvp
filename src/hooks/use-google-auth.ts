@@ -3,7 +3,7 @@
 import { useGoogleConnection } from '@/contexts/google-connect-context';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { refreshGoogleToken } from '@/lib/actions/auth';
+import { refreshGoogleToken } from '@/lib/actions';
 
 /**
  * A simple hook to use Google authentication in components

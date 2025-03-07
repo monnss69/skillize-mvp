@@ -10,12 +10,12 @@ import { Button } from '@/components/shadcn-ui/button';
 import { Input } from '@/components/shadcn-ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/shadcn-ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn-ui/select';
-import { updateUserProfile, uploadAvatar } from '@/lib/actions/user';
+import { updateUserProfile, uploadAvatar } from '@/lib/actions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/shadcn-ui/avatar';
 import { User, UserPreferences } from '@/types';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { TIMEZONES } from '@/lib/constant';
-import { updateUserPreferences } from '@/lib/actions/preferences';
+import { updateUserPreferences } from '@/lib/actions';
 import { FormTimePicker } from "@/components/ui/form-time-picker";
 import { useQueryClient } from '@tanstack/react-query';
 

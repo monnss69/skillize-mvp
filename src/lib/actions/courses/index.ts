@@ -17,7 +17,7 @@ const createCourseSchema = z.object({
   estimated_completion_time: z.string().optional(),
 });
 
-type CreateCourseInput = z.infer<typeof createCourseSchema>;
+export type CreateCourseInput = z.infer<typeof createCourseSchema>;
 
 /**
  * Schema for validating course update data
@@ -33,7 +33,7 @@ const updateCourseSchema = z.object({
   message: "At least one field must be provided for update besides id"
 });
 
-type UpdateCourseInput = z.infer<typeof updateCourseSchema>;
+export type UpdateCourseInput = z.infer<typeof updateCourseSchema>;
 
 /**
  * Type for course operation results that include data
@@ -53,6 +53,8 @@ export interface CourseResult<T> {
  * @returns Result object with success status and new course data
  */
 export async function createCourse(input: CreateCourseInput): Promise<CourseResult<any>> {
+  'use server';
+  
   try {
     // Validate the input data
     const validationResult = createCourseSchema.safeParse(input);
@@ -125,6 +127,8 @@ export async function createCourse(input: CreateCourseInput): Promise<CourseResu
  * @returns Result object with success status and updated course data
  */
 export async function updateCourse(input: UpdateCourseInput): Promise<CourseResult<any>> {
+  'use server';
+
   try {
     // Validate the input data
     const validationResult = updateCourseSchema.safeParse(input);
@@ -195,6 +199,7 @@ export async function updateCourse(input: UpdateCourseInput): Promise<CourseResu
  * @returns Result object with success status and courses data
  */
 export async function getUserCourses(): Promise<CourseResult<any[]>> {
+  'use server';
   try {
     // Initialize Supabase client
     const supabase = createClient();
@@ -247,6 +252,8 @@ export async function getUserCourses(): Promise<CourseResult<any[]>> {
  * @returns Result object with success status
  */
 export async function deleteCourse(id: string): Promise<CourseResult<void>> {
+  'use server';
+  
   try {
     // Initialize Supabase client
     const supabase = createClient();
@@ -294,4 +301,4 @@ export async function deleteCourse(id: string): Promise<CourseResult<void>> {
       error: 'Internal server error',
     };
   }
-} 
+}

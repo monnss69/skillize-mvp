@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { User } from "@/types";
-import { getUserProfile } from "@/lib/actions/user";
+import { getUserProfile } from "@/lib/actions";
 
 export const useUser = () => {
   const { data: session, status: sessionStatus } = useSession();

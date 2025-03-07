@@ -1,6 +1,6 @@
 "use server";
 
-import { syncGoogleCalendar } from "@/lib/actions/calendar";
+import { syncGoogleCalendar } from "@/lib/actions";
 
 export async function syncCalendar() {
     try {

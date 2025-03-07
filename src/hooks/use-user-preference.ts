@@ -1,7 +1,7 @@
 import { UserPreferences } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { getUserPreferences } from "@/lib/actions/preferences";
+import { getUserPreferences } from "@/lib/actions";
 
 export const useUserPreferences = () => {
   const { data: session, status: sessionStatus } = useSession();

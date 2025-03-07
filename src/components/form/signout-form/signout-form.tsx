@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signoutUser } from "@/lib/actions/auth";
+import { signoutUser } from "@/lib/actions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/shadcn-ui/button";
 import { toast } from "sonner";
