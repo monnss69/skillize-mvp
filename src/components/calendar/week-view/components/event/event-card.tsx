@@ -15,7 +15,7 @@ import {
 import { Event } from "@/types";
 import { Button } from "@/components/shadcn-ui/button";
 import { toast } from "sonner";
-import { addRecurrenceException, deleteEvent, editEvent } from "@/lib/actions/calendar";
+import { addRecurrenceException, deleteEvent, editEvent } from "@/lib/actions";
 import { Edit } from "lucide-react";
 import { Trash2 } from "lucide-react";
 import { DeleteDialog } from "./delete-dialog";

@@ -3,6 +3,7 @@
 import { useGoogleConnection } from '@/contexts/google-connect-context';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { refreshGoogleToken } from '@/lib/actions';
 
 /**
  * A simple hook to use Google authentication in components
@@ -26,15 +27,10 @@ export function useGoogleAuth() {
         try {
           setIsRefreshing(true);
           
-          // Call the refresh API
-          const response = await fetch('/api/auth/refresh-google', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
+          // Call the refresh server action
+          const result = await refreshGoogleToken();
           
-          if (response.ok) {
+          if (result.success) {
             // Update the connection state
             await refreshConnection();
           }

@@ -20,7 +20,7 @@ const userUpdateSchema = z.object({
   message: "At least one field must be provided for update"
 });
 
-type UserUpdateInput = z.infer<typeof userUpdateSchema>;
+export type UserUpdateInput = z.infer<typeof userUpdateSchema>;
 
 /**
  * Updates specific fields of the current user profile
@@ -30,6 +30,7 @@ type UserUpdateInput = z.infer<typeof userUpdateSchema>;
  * @returns Object with success status and message or error
  */
 export async function updateUserProfile(input: UserUpdateInput) {
+  'use server';
   try {
     // Validate the input data
     const validationResult = userUpdateSchema.safeParse(input);
@@ -72,7 +73,7 @@ export async function updateUserProfile(input: UserUpdateInput) {
       return {
         success: false,
         error: 'Failed to update user',
-        details: error.message
+        details: { message: error.message }
       };
     }
     
@@ -104,6 +105,60 @@ export async function updateUserProfile(input: UserUpdateInput) {
  * @returns Result from updateUserProfile
  */
 export async function updateUserField(field: keyof UserUpdateInput, value: any) {
+  'use server';
   const updateData = { [field]: value } as UserUpdateInput;
   return updateUserProfile(updateData);
+}
+
+/**
+ * Gets the current user's profile
+ * 
+ * @returns Object with success status and user data or error
+ */
+export async function getUserProfile() {
+  'use server';
+  try {
+    // Initialize Supabase client
+    const supabase = createClient();
+    
+    // Get the current user session
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return {
+        success: false,
+        error: 'Unauthorized',
+      };
+    }
+    
+    // Get the user ID from the session
+    const userId = session.user.id;
+    
+    // Get the user data
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    
+    if (error) {
+      console.error('Error getting user profile:', error);
+      return {
+        success: false,
+        error: 'Failed to get user profile',
+        details: { message: error.message }
+      };
+    }
+    
+    // Return success response with user data
+    return {
+      success: true,
+      user: data
+    };
+  } catch (error) {
+    console.error('Error in getUserProfile:', error);
+    return {
+      success: false,
+      error: 'Internal server error',
+    };
+  }
 } 

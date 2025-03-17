@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useSession } from "next-auth/react";
 import { Event } from "@/types";
 import { 
   format, startOfWeek, addDays, isSameDay,
@@ -87,7 +86,6 @@ export function WeekGridClient() {
         if (event.is_recurring && event.recurrence_rule && shouldShowRecurringEvent(event, day)) {
           // Before generating a recurring instance, check if it's been cancelled
           const isCancelled = cancelledRecurringInstances.some(cancelled => {
-            
             if (cancelled.recurringEventId !== event.recurrence_id) {
               return false;
             }

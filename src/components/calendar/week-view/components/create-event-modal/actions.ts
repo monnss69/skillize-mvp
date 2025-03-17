@@ -1,6 +1,6 @@
 "use server";
 
-import { createEvent as createCalendarEvent } from '@/lib/actions/calendar';
+import { createEvent as createCalendarEvent } from '@/lib/actions';
 import { revalidatePath } from "next/cache";
 
 /**

@@ -80,14 +80,14 @@ export default function SubscriptionSettings() {
 
             <div className="pt-4 space-y-4">
               <Button 
-                className="w-full bg-[#B8A47C] hover:bg-[#A89567] text-[#0A0F14] font-medium"
+                className="w-full bg-[#B8A47C] hover:bg-[#795f24] text-[#0A0F14] font-medium"
               >
                 Upgrade Plan
               </Button>
               
               <Button
                 variant="outline"
-                className="w-full border-[#1E2A36] text-[#E8E2D6] hover:bg-[#1E2A36]/50 hover:text-[#B8A47C] hover:border-[#B8A47C]/30"
+                className="w-full border-[#1E2A36] text-[#0A0F14] hover:bg-[#1E2A36]/50 hover:text-[#B8A47C] hover:border-[#B8A47C]/30"
               >
                 Cancel Subscription
               </Button>

@@ -10,13 +10,14 @@ import { Button } from '@/components/shadcn-ui/button';
 import { Input } from '@/components/shadcn-ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/shadcn-ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn-ui/select';
-import { updateUserProfile } from '@/lib/actions/user';
+import { updateUserProfile, uploadAvatar } from '@/lib/actions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/shadcn-ui/avatar';
 import { User, UserPreferences } from '@/types';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { TIMEZONES } from '@/lib/constant';
-import { updateUserPreferences } from '@/lib/actions/preferences';
+import { updateUserPreferences } from '@/lib/actions';
 import { FormTimePicker } from "@/components/ui/form-time-picker";
+import { useQueryClient } from '@tanstack/react-query';
 
 /**
  * Form schema for updating user profile 
@@ -29,7 +30,6 @@ const formUserSchema = z.object({
   email: z.string().email({
     message: 'Please enter a valid email.',
   }),
-  timezone: z.string().optional(),
   avatar_url: z.string().optional(),
   preferred_study_time: z.object({
     start_time: z.string().optional(),
@@ -60,6 +60,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
   
   // Initialize the form with React Hook Form and Zod validation
   const form = useForm<FormValues>({
@@ -67,7 +68,6 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
     defaultValues: {
       username: initialData.username || '',
       email: initialData.email || '',
-      timezone: initialData.timezone || '',
       avatar_url: initialData.avatar_url || '',
       preferred_study_time: preferences.preferred_study_time || null,
       study_duration: preferences.study_duration || null,
@@ -136,7 +136,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
   };
 
   /**
-   * Confirm and upload the previewed avatar
+   * Uploads the avatar to S3 and updates the user profile
    */
   const confirmAndUploadAvatar = async () => {
     if (!previewFile || !session?.user?.id) return;
@@ -146,64 +146,37 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
       
       // Create FormData for more efficient file upload
       const formData = new FormData();
-      formData.append('userId', session.user.id);
       formData.append('file', previewFile);
       
-      // Upload to S3
-      const response = await fetch('/api/s3/avatar-upload', {
-        method: 'POST',
-        body: formData,
-      });
+      // Upload to S3 using server action
+      const result = await uploadAvatar(formData);
       
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to upload avatar');
+      if (!result.success) {
+        toast.error("Failed to upload avatar", {
+          description: result.error || "An error occurred during upload",
+        });
+        return;
       }
       
-      // Generate avatar URL based on user ID
-      // Using the CDN URL pattern for the S3 bucket or direct S3 URL
-      const cdnUrl = process.env.NEXT_PUBLIC_CDN_URL || '';
-      let avatarUrl = '';
+      // Update the avatar preview with the new URL
+      form.setValue('avatar_url', result.url);
       
-      if (cdnUrl) {
-        // If CDN is configured, use CDN URL pattern
-        avatarUrl = `${cdnUrl}/avatars/${session.user.id}.jpg`;
-      } else {
-        // Fallback to direct S3 URL
-        const bucketName = process.env.NEXT_PUBLIC_S3_BUCKET_NAME || '';
-        const region = process.env.NEXT_PUBLIC_S3_REGION || '';
-        avatarUrl = `https://${bucketName}.s3.${region}.amazonaws.com/avatars/${session.user.id}.jpg`;
-      }
-      
-      // Add cache busting parameter to force refresh
-      avatarUrl = `${avatarUrl}?t=${new Date().getTime()}`;
-      
-      // Update the form value
-      form.setValue('avatar_url', avatarUrl);
+      // Clear the preview
+      setPreviewFile(null);
       
       toast.success("Avatar uploaded", {
-        description: "Your avatar has been updated successfully.",
+        description: "Your avatar has been updated successfully",
       });
       
-      // Clear the preview after successful upload
-      if (previewUrl && previewUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(previewUrl);
-      }
-      setPreviewUrl(null);
-      setPreviewFile(null);
+      // Refresh the user data
+      await queryClient.invalidateQueries({ queryKey: ['user'] });
     } catch (error) {
-      console.error('Avatar upload error:', error);
+      console.error('Error uploading avatar:', error);
       toast.error("Upload failed", {
-        description: error instanceof Error ? error.message : "An error occurred during upload.",
+        description: "An error occurred during upload",
       });
     } finally {
       setIsUploading(false);
-      
-      // Clear the file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
     }
   };
 
@@ -254,7 +227,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
       const changedFields = Object.entries(data).reduce((fields, [key, value]) => {
         const fieldKey = key as keyof FormValues;
         // Only include non-preference fields in this object
-        if (fieldKey === 'username' || fieldKey === 'email' || fieldKey === 'timezone' || fieldKey === 'avatar_url') {
+        if (fieldKey === 'username' || fieldKey === 'email' || fieldKey === 'avatar_url') {
           // Only add fields that have changed from initial values
           if (value !== initialData[fieldKey as keyof User]) {
             fields[fieldKey] = value as any; // We'll handle the type conversion in the server action
@@ -474,35 +447,6 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
                   className="bg-[#1E2A36] border-[#2A3A4A] text-[#E8E2D6]"
                 />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        {/* Timezone field */}
-        <FormField
-          control={form.control}
-          name="timezone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Timezone</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger className="bg-[#1E2A36] border-[#2A3A4A] text-[#E8E2D6]">
-                    <SelectValue placeholder="Select your timezone"> {field.value} </SelectValue>
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent className="max-h-[300px]">
-                  {TIMEZONES.map((timezone) => (
-                    <SelectItem key={timezone.value} value={timezone.value}>
-                      {timezone.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
               <FormMessage />
             </FormItem>
           )}

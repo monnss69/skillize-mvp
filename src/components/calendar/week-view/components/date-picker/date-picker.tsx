@@ -117,6 +117,7 @@ export function DateTimePicker({
       }
     }
 
+    console.log(newDate);
     setDate(newDate);
     onChange(newDate);
   };

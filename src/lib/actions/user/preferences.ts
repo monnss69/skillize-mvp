@@ -23,7 +23,7 @@ const userPreferencesSchema = z.object({
   message: "At least one preference field must be provided for update"
 });
 
-type UserPreferencesInput = z.infer<typeof userPreferencesSchema>;
+export type UserPreferencesInput = z.infer<typeof userPreferencesSchema>;
 
 /**
  * Updates user study preferences
@@ -33,6 +33,7 @@ type UserPreferencesInput = z.infer<typeof userPreferencesSchema>;
  * @returns Object with success status and message or error
  */
 export async function updateUserPreferences(input: UserPreferencesInput) {
+  'use server';
   try {
     // Validate the input data
     const validationResult = userPreferencesSchema.safeParse(input);
@@ -75,7 +76,7 @@ export async function updateUserPreferences(input: UserPreferencesInput) {
       return {
         success: false,
         error: 'Failed to update user preferences',
-        details: error.message
+        details: { message: error.message }
       };
     }
     
@@ -106,6 +107,7 @@ export async function updateUserPreferences(input: UserPreferencesInput) {
  * @returns Result from updateUserPreferences
  */
 export async function updateUserPreferenceField(field: keyof UserPreferencesInput, value: any) {
+  'use server';
   const updateData = { [field]: value } as UserPreferencesInput;
   return updateUserPreferences(updateData);
 }
@@ -116,6 +118,7 @@ export async function updateUserPreferenceField(field: keyof UserPreferencesInpu
  * @returns Object with success status and preferences data or error
  */
 export async function getUserPreferences() {
+  'use server';
   try {
     // Initialize Supabase client
     const supabase = createClient();
@@ -160,4 +163,4 @@ export async function getUserPreferences() {
       error: 'Internal server error',
     };
   }
-}
+} 
