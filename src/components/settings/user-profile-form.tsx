@@ -30,7 +30,6 @@ const formUserSchema = z.object({
   email: z.string().email({
     message: 'Please enter a valid email.',
   }),
-  timezone: z.string().optional(),
   avatar_url: z.string().optional(),
   preferred_study_time: z.object({
     start_time: z.string().optional(),
@@ -69,7 +68,6 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
     defaultValues: {
       username: initialData.username || '',
       email: initialData.email || '',
-      timezone: initialData.timezone || '',
       avatar_url: initialData.avatar_url || '',
       preferred_study_time: preferences.preferred_study_time || null,
       study_duration: preferences.study_duration || null,
@@ -229,7 +227,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
       const changedFields = Object.entries(data).reduce((fields, [key, value]) => {
         const fieldKey = key as keyof FormValues;
         // Only include non-preference fields in this object
-        if (fieldKey === 'username' || fieldKey === 'email' || fieldKey === 'timezone' || fieldKey === 'avatar_url') {
+        if (fieldKey === 'username' || fieldKey === 'email' || fieldKey === 'avatar_url') {
           // Only add fields that have changed from initial values
           if (value !== initialData[fieldKey as keyof User]) {
             fields[fieldKey] = value as any; // We'll handle the type conversion in the server action
@@ -449,35 +447,6 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
                   className="bg-[#1E2A36] border-[#2A3A4A] text-[#E8E2D6]"
                 />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        {/* Timezone field */}
-        <FormField
-          control={form.control}
-          name="timezone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Timezone</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger className="bg-[#1E2A36] border-[#2A3A4A] text-[#E8E2D6]">
-                    <SelectValue placeholder="Select your timezone"> {field.value} </SelectValue>
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent className="max-h-[300px]">
-                  {TIMEZONES.map((timezone) => (
-                    <SelectItem key={timezone.value} value={timezone.value}>
-                      {timezone.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
               <FormMessage />
             </FormItem>
           )}

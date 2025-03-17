@@ -328,6 +328,7 @@ export async function editEvent(input: EditEventInput) {
         success: false,
         error: 'Event not found or not authorized',
       };
+
     }
 
     // Update the event in the database
