@@ -10,6 +10,14 @@ import { createClient } from '@/lib/supabase/server';
 
 async function refreshAccessToken(token: JWT): Promise<JWT> {
   try {
+    // Don't attempt to refresh if no refresh token
+    if (!token.refreshToken) {
+      return {
+        ...token,
+        error: 'NoRefreshTokenError',
+      };
+    }
+
     const url = 'https://oauth2.googleapis.com/token';
 
     const response = await fetch(url, {
@@ -28,14 +36,25 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
     const refreshedTokens = await response.json();
 
     if (!response.ok) {
+      // Handle specific OAuth errors
+      if (refreshedTokens.error === 'invalid_grant') {
+        return {
+          ...token,
+          error: 'RefreshTokenExpired',
+          accessToken: undefined,
+          refreshToken: undefined,
+          accessTokenExpires: undefined,
+        };
+      }
       throw refreshedTokens;
     }
 
     return {
       ...token,
       accessToken: refreshedTokens.access_token,
-      accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000, // 1 hour
-      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken, // Fallback to old refresh token
+      accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
+      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken, // Fall back to old refresh token
+      error: undefined, // Clear any previous errors
     };
   } catch (error) {
     console.error('Error refreshing access token:', error);
@@ -131,52 +150,57 @@ export const authOptions: NextAuthOptions = {
      * @param token JWT token object
      * @param account Account object
      * @param user User object
+     * @param trigger Trigger object
      * @returns JWT token object
      */
-    async jwt({ token, account, user }) {
+    async jwt({ token, account, user, trigger }) {
+      // Initial sign in
       if (account && user) {
-        // Store the actual user ID from Supabase
-        token.id = user.id;
-        token.accessToken = account.access_token;
-        token.refreshToken = account.refresh_token;
-        token.accessTokenExpires = account.expires_at
-          ? account.expires_at * 1000
-          : null;
-        // Store googleId separately if needed
-        if (account.provider === 'google') {
-          token.googleId = (user as any).google_id;
+        if (!account.access_token) {
+          return { ...token, error: 'AccessTokenMissing' };
         }
         
-        // Store user timezone if available
-        if ((user as any).timezone) {
-          token.timezone = (user as any).timezone;
-        }
+        return {
+          ...token,
+          id: user.id,
+          accessToken: account.access_token,
+          refreshToken: account.refresh_token,
+          accessTokenExpires: account.expires_at ? account.expires_at * 1000 : null,
+          googleId: account.provider === 'google' ? (user as any).google_id : undefined,
+          timezone: (user as any).timezone,
+          provider: account.provider, // Store the provider information
+          error: undefined,
+        };
       }
-      
-      // If token exists but no timezone (for subsequent requests), fetch from Supabase
-      if (token.id && !token.timezone) {
-        try {
-          const supabase = createClient();
-          const { data: userData } = await supabase
-            .from('users')
-            .select('timezone')
-            .eq('id', token.id)
-            .single();
-            
-          if (userData?.timezone) {
-            token.timezone = userData.timezone;
-          }
-        } catch (error) {
-          console.error('Error fetching user timezone:', error);
-        }
+
+      // For Google users, force re-authentication if both tokens are missing
+      if (token.provider === 'google' && !token.accessToken && !token.refreshToken) {
+        return { ...token, error: 'RequiresSignIn' };
       }
-      
-      // If access token has not expired, return it
-      if (typeof token.accessTokenExpires === 'number' && token.accessTokenExpires > Date.now()) {
+
+      // Return previous token if the access token has not expired yet
+      if (!token.accessToken) {
+        return { ...token, error: 'AccessTokenMissing' };
+      }
+
+      if (token.accessTokenExpires && typeof token.accessTokenExpires === 'number' && Date.now() < token.accessTokenExpires) {
         return token;
       }
-      // Otherwise, refresh the access token
-      return refreshAccessToken(token);
+
+      // Access token has expired, try to refresh it
+      const refreshedToken = await refreshAccessToken(token);
+
+      // If refresh token is expired/invalid, clear the session
+      if (refreshedToken.error === 'RefreshTokenExpired' || refreshedToken.error === 'AccessTokenMissing') {
+        return {
+          ...refreshedToken,
+          accessToken: undefined,
+          refreshToken: undefined,
+          accessTokenExpires: undefined,
+        };
+      }
+
+      return refreshedToken;
     },
 
     /**
@@ -187,17 +211,29 @@ export const authOptions: NextAuthOptions = {
      * @returns Session object
      */
     async session({ session, token }) {
+      // Force re-authentication for Google users when both tokens are missing
+      if (token.error === 'RequiresSignIn') {
+        throw new Error('RequiresSignIn');
+      }
+      
+      // Check for token errors that should invalidate the session
+      if (token.error === 'AccessTokenMissing' || token.error === 'RefreshTokenExpired') {
+        return session; // Return the session but with no tokens
+      }
+      
       const extendedSession = session as ExtendedSession;
       if (token) {
         // Ensure we're setting the Supabase user ID here
         extendedSession.user.id = token.id as string;
         extendedSession.user.accessToken = token.accessToken as string;
         extendedSession.user.refreshToken = token.refreshToken as string;
+        extendedSession.user.provider = token.provider as string;
         // Keep googleId as additional information if needed
         extendedSession.user.googleId = token.googleId as string;
         // Add timezone to session
         extendedSession.user.timezone = token.timezone as string;
       }
+      
       return extendedSession;
     },
 

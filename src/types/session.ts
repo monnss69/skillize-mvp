@@ -11,6 +11,7 @@ export interface ExtendedSession extends Session {
         refreshToken?: string;
         googleId?: string;
         timezone?: string;
+        provider?: string;
     }
 }
 

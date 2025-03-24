@@ -1,8 +1,8 @@
 import type { Config } from "tailwindcss";
-import { fontFamily } from "tailwindcss/defaultTheme";
+import defaultTheme from "tailwindcss/defaultTheme";
 
 const config = {
-	darkMode: ["class"],
+	darkMode: "class",
 	content: [
 		"./pages/**/*.{ts,tsx}",
 		"./components/**/*.{ts,tsx}",
@@ -199,7 +199,7 @@ const config = {
 			fontFamily: {
 				sans: [
 					'var(--font-space-grotesk)',
-					...fontFamily.sans
+					...(defaultTheme.fontFamily.sans as string[])
 				]
 			},
 			borderRadius: {

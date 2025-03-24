@@ -11,6 +11,7 @@ declare module "next-auth" {
       refreshToken?: string | null;
       timezone?: string;
       googleId?: string;
+      provider?: string;
     };
   }
 
@@ -22,5 +23,6 @@ declare module "next-auth" {
     error?: string;
     googleId?: string;
     timezone?: string;
+    provider?: string;
   }
 } 

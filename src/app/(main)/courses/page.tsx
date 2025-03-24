@@ -1,10 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Filter, Plus } from "lucide-react"
+import { Search } from "lucide-react"
 import { Button } from "@/components/shadcn-ui/button"
 import { Input } from "@/components/shadcn-ui/input"
 import { CourseCard } from "@/components/course/CourseCard"
+import { CreateCourseModal } from "@/components/course/CreateCourseModal"
 import useCourse from "@/hooks/use-course"
 
 export default function CoursesPage() {
@@ -56,12 +57,7 @@ export default function CoursesPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" className="border-course-card-border text-course-card-text-primary hover:bg-gray-600">
-              <Plus className="h-4 w-4 mr-2 text-black" />
-                <span className="text-black">Create a new Course</span>
-              </Button>
-            </div>
+            <CreateCourseModal />
           </div>
         </div>
 
