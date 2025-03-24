@@ -132,7 +132,7 @@ export default function EventCard({ event }: EventCardProps) {
             style={{
               top: `${startMinutes}px`,
               height: `${heightStyle}px`,
-              borderLeftColor: eventColor,
+              borderLeftColor: eventColor || 'rgb(var(--calendar-event-default))',
             }}
             className={`
               flex flex-col absolute left-0 right-0 mr-1 p-2 rounded-md 
@@ -144,18 +144,18 @@ export default function EventCard({ event }: EventCardProps) {
           >
             <div
               style={{
-                backgroundColor: eventColor,
+                backgroundColor: eventColor || 'rgb(var(--calendar-event-default))',
                 opacity: 0.15,
               }}
               className="absolute inset-0 rounded-md"
             />
 
             <div className="relative z-10">
-              <div className="text-[0.8rem] leading-4 text-gray-200 mb-1">
+              <div className="text-[0.8rem] leading-4 text-calendar-text-primary mb-1">
                 {event.title}
                 {(!event.isStart || !event.isEnd) && " (continues)"}
               </div>
-              <div className="font-sans text-xs text-gray-400">
+              <div className="font-sans text-xs text-calendar-text-secondary">
                 {event.isStart ? format(event.start_time, "h:mm") : "12:00 am"}{" "}
                 - {event.isEnd ? format(event.end_time, "h:mm a") : "11:59 pm"}
               </div>
@@ -173,10 +173,10 @@ export default function EventCard({ event }: EventCardProps) {
               background: `linear-gradient(45deg, ${eventColor} 0%, ${eventColor} 30%, transparent 150%)`,
               boxShadow: `0 0 10px ${eventColor}`,
             }}
-            className="overflow-hidden relative bg-gradient-to-br from-slate-900 via-[#0f172a] to-[#0c1222] shadow-lg shadow-blue-900/10 border-0 rounded-md"
+            className="overflow-hidden relative bg-gradient-to-br from-calendar-event-card-from via-calendar-event-card-via to-calendar-event-card-to shadow-lg shadow-blue-900/10 border-0 rounded-md"
           >
             <CardHeader className="pb-0 pt-5">
-              <CardTitle className="text-lg text-slate-100 border-b border-slate-700/50 pb-2 flex items-center gap-2">
+              <CardTitle className="text-lg text-calendar-text-primary border-b border-calendar-border-secondary pb-2 flex items-center gap-2">
                 <div
                   className="w-3 h-3 rounded-full animate-pulse"
                   style={{
@@ -188,8 +188,8 @@ export default function EventCard({ event }: EventCardProps) {
                   {event.title}
                 </span>
               </CardTitle>
-              <CardDescription className="text-slate-400 mt-2 flex items-center">
-                <div className="bg-slate-800/50 px-2 py-1 rounded-md backdrop-blur-sm border border-slate-700/30 text-xs">
+              <CardDescription className="text-calendar-text-secondary mt-2 flex items-center">
+                <div className="bg-slate-800/50 px-2 py-1 rounded-md backdrop-blur-sm border border-calendar-border-secondary text-xs">
                   {event.isStart
                     ? format(event.original_start_time, "MMM d • h:mm a")
                     : "Starts earlier"}
@@ -202,20 +202,20 @@ export default function EventCard({ event }: EventCardProps) {
             </CardHeader>
 
             <CardContent className="pt-4">
-              <h2 className="text-slate-200 text-base font-medium mb-2 flex items-center">
+              <h2 className="text-calendar-text-primary text-base font-medium mb-2 flex items-center">
                 <span className="relative">
                   Details
                 </span>
               </h2>
-              <div className="text-sm text-slate-300 p-3 rounded-md border border-slate-700/50 bg-slate-800/30 backdrop-blur-sm">
+              <div className="text-sm text-calendar-text-primary p-3 rounded-md border border-calendar-border-secondary bg-slate-800/30 backdrop-blur-sm">
                 {event.description ? event.description : "No description"}
               </div>
             </CardContent>
 
-            <div className="flex items-center justify-end gap-2 p-4 pt-2 border-t border-slate-800/50 bg-slate-900/30">
+            <div className="flex items-center justify-end gap-2 p-4 pt-2 border-t border-calendar-border-secondary bg-slate-900/30">
               <Button
                 variant="outline"
-                className="h-9 bg-slate-800/80 border-slate-700/50 hover:bg-slate-700 hover:text-cyan-400 transition-all duration-200 text-slate-200"
+                className="h-9 bg-slate-800/80 border-calendar-border-secondary hover:bg-slate-700 hover:text-cyan-400 transition-all duration-200 text-calendar-text-primary"
                 onClick={handleEditClick}
               >
                 <Edit className="w-4 h-4 mr-2" />

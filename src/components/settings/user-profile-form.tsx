@@ -311,42 +311,42 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-2xl mx-auto">
-        <h2 className="text-2xl font-light text-[#B8A47C] text-center mb-8">Profile Settings</h2>
+        <h2 className="text-2xl font-light text-settings-text-accent text-center mb-8">Profile Settings</h2>
         
         {/* Avatar with drag & drop */}
         <div className="flex flex-col items-center justify-center gap-2">
           <div 
-            className={`relative rounded-full cursor-pointer overflow-hidden transition-all duration-200 ${isDragging ? 'ring-4 ring-[#B8A47C] scale-105' : ''}`}
+            className={`relative rounded-full cursor-pointer overflow-hidden transition-all duration-200 ${isDragging ? 'ring-4 ring-settings-border-accent scale-105' : ''}`}
             onDragOver={(e) => handleDragEvents(e, true)}
             onDragEnter={(e) => handleDragEvents(e, true)}
             onDragLeave={(e) => handleDragEvents(e, false)}
             onDrop={handleDrop}
             onClick={() => !previewUrl && fileInputRef.current?.click()}
           >
-            <Avatar className="h-40 w-40 border-2 border-[#B8A47C]/20 relative">
+            <Avatar className="h-40 w-40 border-2 border-settings-border-accent/20 relative">
               {isUploading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full z-10">
-                  <Loader2 className="h-10 w-10 text-[#B8A47C] animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center bg-settings-bg-primary/50 rounded-full z-10">
+                  <Loader2 className="h-10 w-10 text-settings-text-accent animate-spin" />
                 </div>
               )}
               <AvatarImage 
                 src={previewUrl || form.watch('avatar_url') || initialData.avatar_url || ''}
               />
-              <AvatarFallback className="text-xl font-medium text-[#B8A47C]">
+              <AvatarFallback className="text-xl font-medium text-settings-text-accent">
                 {form.watch('username')?.substring(0, 2)?.toUpperCase() || 'UN'}
               </AvatarFallback>
             </Avatar>
             
             {/* Drag overlay */}
             {isDragging && (
-              <div className="absolute inset-0 flex items-center justify-center bg-[#1E2A36]/80 rounded-full z-20">
-                <p className="text-[#B8A47C] text-sm font-medium">Drop to upload</p>
+              <div className="absolute inset-0 flex items-center justify-center bg-settings-bg-tertiary/80 rounded-full z-20">
+                <p className="text-settings-text-accent text-sm font-medium">Drop to upload</p>
               </div>
             )}
           </div>
           
           {/* Username display */}
-          <p className="text-[#E8E2D6] font-medium mt-1">
+          <p className="text-settings-text-primary font-medium mt-1">
             {form.watch('username') || 'Username'}
           </p>
 
@@ -365,7 +365,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
               <Button 
                 type="button"
                 variant="default"
-                className="bg-[#B8A47C] hover:bg-[#A89567] text-black"
+                className="bg-settings-button-primary hover:bg-settings-button-primary-hover text-settings-bg-primary"
                 onClick={confirmAndUploadAvatar}
                 disabled={isUploading}
               >
@@ -383,7 +383,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
               <Button 
                 type="button"
                 variant="outline" 
-                className="bg-[#1E2A36] border-[#2A3A4A] text-[#E8E2D6]"
+                className="bg-settings-bg-tertiary border-settings-border-secondary text-settings-text-primary"
                 onClick={cancelPreview}
                 disabled={isUploading}
               >
@@ -394,7 +394,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
             <Button 
               type="button"
               variant="outline" 
-              className="bg-[#1E2A36] border-[#2A3A4A] text-[#E8E2D6] mt-2"
+              className="bg-settings-bg-tertiary border-settings-border-secondary text-settings-text-primary mt-2"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
             >
@@ -404,11 +404,11 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
           )}
           
           {previewUrl ? (
-            <p className="text-xs text-gray-400 text-center mt-1">
+            <p className="text-xs text-settings-text-secondary text-center mt-1">
               Preview mode - Confirm to save or Cancel to discard
             </p>
           ) : (
-            <p className="text-xs text-gray-400 text-center mt-1">
+            <p className="text-xs text-settings-text-secondary text-center mt-1">
               Click or drag & drop to change your avatar
             </p>
           )}
@@ -425,7 +425,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
                 <Input
                   placeholder="Your username"
                   {...field}
-                  className="bg-[#1E2A36] border-[#2A3A4A] text-[#E8E2D6]"
+                  className="bg-settings-bg-tertiary border-settings-border-secondary text-settings-text-primary"
                 />
               </FormControl>
               <FormMessage />
@@ -444,7 +444,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
                 <Input
                   placeholder="your.email@example.com"
                   {...field}
-                  className="bg-[#1E2A36] border-[#2A3A4A] text-[#E8E2D6]"
+                  className="bg-settings-bg-tertiary border-settings-border-secondary text-settings-text-primary"
                 />
               </FormControl>
               <FormMessage />
@@ -464,7 +464,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
                 defaultValue={field.value || ""}
               >
                 <FormControl>
-                  <SelectTrigger className="bg-[#1E2A36] border-[#2A3A4A] text-[#E8E2D6]">
+                  <SelectTrigger className="bg-settings-bg-tertiary border-settings-border-secondary text-settings-text-primary">
                     <SelectValue placeholder="Select your learning style" />
                   </SelectTrigger>
                 </FormControl>
@@ -475,7 +475,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
                 </SelectContent>
               </Select>
               <FormMessage />
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-sm text-settings-text-secondary mt-1">
                 Your preferred way of learning new information.
               </p>
             </FormItem>
@@ -493,7 +493,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
                 <Input
                   type="number"
                   placeholder="25"
-                  className="bg-[#1E2A36] border-[#2A3A4A] text-[#E8E2D6]"
+                  className="bg-settings-bg-tertiary border-settings-border-secondary text-settings-text-primary"
                   {...field}
                   onChange={(e) => {
                     const value = e.target.value === '' ? null : Number(e.target.value);
@@ -503,7 +503,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
                 />
               </FormControl>
               <FormMessage />
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-sm text-settings-text-secondary mt-1">
                 How long would you like your focused study sessions to be?
               </p>
             </FormItem>
@@ -521,7 +521,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
                 <Input
                   type="number"
                   placeholder="5"
-                  className="bg-[#1E2A36] border-[#2A3A4A] text-[#E8E2D6]"
+                  className="bg-settings-bg-tertiary border-settings-border-secondary text-settings-text-primary"
                   {...field}
                   onChange={(e) => {
                     const value = e.target.value === '' ? null : Number(e.target.value);
@@ -531,7 +531,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
                 />
               </FormControl>
               <FormMessage />
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-sm text-settings-text-secondary mt-1">
                 How long would you like your breaks between study sessions to be?
               </p>
             </FormItem>
@@ -540,7 +540,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
         
         {/* Preferred Study Time */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-[#E8E2D6]">Preferred Study Time</h3>
+          <h3 className="text-lg font-medium text-settings-text-primary">Preferred Study Time</h3>
           
           {/* Preference (morning/afternoon/evening) */}
           <FormField
@@ -554,7 +554,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
                   defaultValue={field.value || ""}
                 >
                   <FormControl>
-                    <SelectTrigger className="bg-[#1E2A36] border-[#2A3A4A] text-[#E8E2D6]">
+                    <SelectTrigger className="bg-settings-bg-tertiary border-settings-border-secondary text-settings-text-primary">
                       <SelectValue placeholder="Select preferred time of day" />
                     </SelectTrigger>
                   </FormControl>
@@ -589,7 +589,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
             containerClassName="mb-2"
           />
           
-          <p className="text-sm text-gray-400 mb-4">
+          <p className="text-sm text-settings-text-secondary">
             Setting your preferred study times helps us optimize your learning schedule and reminders.
           </p>
         </div>
@@ -598,7 +598,7 @@ export default function UserProfileForm({ initialData, preferences }: { initialD
         <Button 
           type="submit" 
           disabled={isLoading}
-          className="w-full bg-[#B8A47C] hover:bg-[#A89567] text-black"
+          className="w-full bg-settings-button-primary hover:bg-settings-button-primary-hover text-settings-bg-primary"
         >
           {isLoading ? "Updating..." : "Update Profile"}
         </Button>

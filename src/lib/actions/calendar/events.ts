@@ -137,8 +137,6 @@ export async function deleteEvent(id: string) {
   try {
     // Initialize Supabase client
     const supabase = createClient();
-
-    console.log(id);
     
     // Get the current user session
     const session = await getServerSession(authOptions);
@@ -151,8 +149,6 @@ export async function deleteEvent(id: string) {
 
     // Get the user ID from the session
     const userId = session.user.id;
-
-    console.log(userId);
 
     // First fetch the event to check if it's from Google
     const { data: eventData, error: eventError } = await supabase
@@ -194,8 +190,6 @@ export async function deleteEvent(id: string) {
       .delete()
       .eq('id', id)
       .eq('user_id', userId);
-
-    console.log(JSON.stringify(data, null, 4));
 
     if (error) {
       return {
@@ -351,9 +345,6 @@ export async function editEvent(input: EditEventInput) {
       };
     }
 
-    console.log(id);
-    console.log(eventData.recurrence_id);
-
     if (eventData.source === 'google') {
       await editGoogleCalendarEvent(id, {
         id: eventData.recurrence_id ? eventData.recurrence_id : id,
@@ -396,8 +387,6 @@ export async function editGoogleCalendarEvent(eventId: string, eventData: EditEv
     
     // Get the access token from the session
     const accessToken = session.user.accessToken;
-
-    console.log("eventId", eventId);
     
     // First, get the current event to preserve the timezone
     const getResponse = await fetch(
@@ -416,7 +405,6 @@ export async function editGoogleCalendarEvent(eventId: string, eventData: EditEv
     }
     
     const currentEvent = await getResponse.json();
-    console.log("currentEvent", currentEvent);
     
     // Make request to Google Calendar API to update the event
     const response = await fetch(
@@ -443,8 +431,6 @@ export async function editGoogleCalendarEvent(eventId: string, eventData: EditEv
         )
       }
     );
-
-    console.log("response", response);
 
     if (response.status !== 200) {
       const errorData = await response.json().catch(() => ({}));

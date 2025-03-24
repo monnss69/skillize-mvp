@@ -1,14 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { Calendar, Settings, BookOpen, Lightbulb, User, Plus } from "lucide-react";
-import { CreateEventModal } from "./components/create-event-modal/create-event-modal";
+import { Calendar, Settings, BookOpen, Lightbulb, User } from "lucide-react";
 import { Button } from "@/components/shadcn-ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/shadcn-ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn-ui/avatar";
 import { Badge } from "@/components/shadcn-ui/badge";
 import { Separator } from "@/components/shadcn-ui/separator";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { useUser } from "@/hooks/use-user";
+
 /**
  * CalendarSidebar Component
  *
@@ -19,66 +18,77 @@ import { useRouter } from "next/navigation";
  * - className (optional): Additional CSS classes to apply to the sidebar.
  */
 export function CalendarSidebar({ className }: { className?: string }) {
+  const pathname = usePathname();
   const router = useRouter();
+  const user = useUser();
+
+  const isCalendarPage = pathname === "/calendar";
+  const isTutorialPage = pathname === "/tutorial";
+  const isCoursesPage = pathname === "/courses";
+  const isProfilePage = pathname === "/profile";
 
   return (
-    <div className={`bg-[#0D1419] text-[#E8E2D6] h-full flex flex-col ${className}`}>
+    <div className={`bg-calendar-bg-secondary text-calendar-text-primary h-full flex flex-col ${className}`}>
       {/* User Avatar Section */}
       <div className="p-8 flex flex-col items-center">
-        <Avatar className="h-20 w-20 mb-1 bg-[#1E2A36] border-2 border-[#B8A47C]/20">
-          <AvatarImage src="/placeholder-avatar.png" alt="User Avatar" />
-          <AvatarFallback className="text-xl font-medium text-[#B8A47C]">UN</AvatarFallback>
+        <Avatar className="h-24 w-24 mb-1 bg-calendar-hover border-2 border-calendar-accent-border">
+          <AvatarImage src={user?.data?.avatar_url || "/placeholder-avatar.png"} alt="User Avatar" />
+          <AvatarFallback className="text-xl font-medium text-calendar-accent-primary">{user?.data?.username?.charAt(0).toUpperCase()}</AvatarFallback>
         </Avatar>
-        <h2 className="text-lg font-medium mt-2 text-[#E8E2D6]">USERNAME</h2>
-        <Badge variant="outline" className="mt-1 bg-[#1E2A36] text-[#B8A47C] border-[#B8A47C]/30">
+        <h2 className="text-lg font-medium mt-2 text-calendar-text-primary">{user?.data?.username}</h2>
+        <Badge variant="outline" className="mt-1 bg-calendar-hover text-calendar-accent-primary border-calendar-accent-border">
           Premium
         </Badge>
       </div>
       
-      <Separator className="bg-[#1E2A36]" />
+      <Separator className="bg-calendar-hover" />
       
       {/* Navigation Buttons */}
-      <div className="flex-1 p-5">
-        <nav className="space-y-1 mt-4">
+      <div className="flex-1 p-4">
+        <nav className="space-y-1">
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 text-[#B8A47C] hover:text-[#D4C8A8] hover:bg-[#1E2A36]/50 h-11"
+            className={`w-full justify-start gap-3 text-calendar-text-primary hover:text-calendar-hover-light hover:bg-calendar-overlay-hover h-11 ${isProfilePage ? "bg-calendar-overlay-hover" : ""}`}
+            onClick={() => router.push("/profile")}
           >
-            <User size={18} />
+            <User className="text-calendar-accent-primary" size={18} />
             <span className="font-light">Profile</span>
           </Button>
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 text-[#E8E2D6] hover:text-[#D4C8A8] hover:bg-[#1E2A36]/50 h-11 bg-[#1E2A36]/30"
+            className={`w-full justify-start gap-3 text-calendar-text-primary hover:text-calendar-hover-light hover:bg-calendar-overlay-hover h-11 ${isCalendarPage ? "bg-calendar-overlay-hover" : ""}`}
+            onClick={() => router.push("/calendar")}
           >
-            <Calendar size={18} className="text-[#B8A47C]" />
+            <Calendar size={18} className="text-calendar-accent-primary" />
             <span className="font-light">Calendar</span>
           </Button>
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 text-[#E8E2D6] hover:text-[#D4C8A8] hover:bg-[#1E2A36]/50 h-11"
+            className={`w-full justify-start gap-3 text-calendar-text-primary hover:text-calendar-hover-light hover:bg-calendar-overlay-hover h-11`}
             onClick={() => router.push("/settings")}
           >
-            <Settings size={18} />
+            <Lightbulb size={18} className="text-calendar-accent-primary" />
             <span className="font-light">Settings</span>
+          </Button>
+          <Button
+            variant="ghost"
+            className={`w-full justify-start gap-3 text-calendar-text-primary hover:text-calendar-hover-light hover:bg-calendar-overlay-hover h-11 ${isCoursesPage ? "bg-calendar-overlay-hover" : ""}`}
+            onClick={() => router.push("/courses")}
+          >
+            <BookOpen className="text-calendar-accent-primary" size={18} />
+            <span className="font-light">Courses</span>
           </Button>
         </nav>
       </div>
       
       {/* Learning & Tutorial Buttons */}
-      <div className="p-5 space-y-3">
+      <div className="p-4 space-y-2">
         <Button
           variant="outline"
-          className="w-full justify-start gap-3 bg-transparent border-[#1E2A36] hover:bg-[#1E2A36]/50 hover:text-[#D4C8A8] h-11 text-[#E8E2D6]"
+          className={`w-full justify-start gap-3 bg-transparent border-calendar-hover hover:bg-calendar-overlay-hover hover:text-calendar-hover-light h-11 text-calendar-text-primary ${isTutorialPage ? "bg-calendar-overlay-hover" : ""}`}
+          onClick={() => router.push("/tutorial")}
         >
-          <Lightbulb size={18} className="text-[#B8A47C]" />
-          <span className="font-light">Learn a new skill</span>
-        </Button>
-        <Button
-          variant="outline"
-          className="w-full justify-start gap-3 bg-transparent border-[#1E2A36] hover:bg-[#1E2A36]/50 hover:text-[#D4C8A8] h-11 text-[#E8E2D6]"
-        >
-          <BookOpen size={18} className="text-[#B8A47C]" />
+          <BookOpen size={18} className="text-calendar-accent-primary" />
           <span className="font-light">Tutorial</span>
         </Button>
       </div>

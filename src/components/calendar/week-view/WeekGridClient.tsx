@@ -17,9 +17,10 @@ import { useEvent } from "@/hooks/use-event";
  */
 export function WeekGridClient() {
   const [referenceDate, setReferenceDate] = useState(new Date());
+  const [events, setEvents] = useState<Event[]>([]);
   const timeSlots = useMemo(() => Array.from({ length: 24 }, (_, i) => i), []);
 
-  const { data: events, isLoading, error } = useEvent();
+  const { data: fetchedEvents, isLoading, error } = useEvent();
 
   // Compute start of the visible week
   const startOfReferenceWeek = useMemo(
@@ -142,8 +143,6 @@ export function WeekGridClient() {
             : event.title
         };
 
-        console.log(segmentedEvent);
-
         return (
           <EventCard 
             key={`${event.id}-${day.toISOString()}`} 
@@ -155,9 +154,9 @@ export function WeekGridClient() {
   }
 
   return (
-    <div className="flex flex-col w-full h-full bg-[#0A0F14] text-[#E8E2D6] font-sans">
+    <div className="flex flex-col w-full h-full bg-calendar-bg-primary text-calendar-text-primary font-sans">
       {/* The header handles changing the reference date without refreshing */}
-      <div className="px-6 py-4 flex justify-between items-center relative z-50 bg-[#0D1419] border-b border-[#1E2A36]">
+      <div className="px-6 py-4 flex justify-between items-center relative z-50 bg-calendar-bg-secondary border-b border-calendar-border-primary">
         <CalendarHeader
           referenceDate={referenceDate}
           onChangeDate={setReferenceDate}
@@ -165,29 +164,29 @@ export function WeekGridClient() {
       </div>
 
       {/* Status message */}
-      <div className="bg-[#0D1419] p-4 border-b border-[#1E2A36] flex justify-between items-center z-40">
+      <div className="bg-calendar-bg-secondary p-4 border-b border-calendar-border-primary flex justify-between items-center z-40">
         <div className="flex items-center gap-3">
-          <div className="h-2 w-2 rounded-full bg-[#B8A47C]"></div>
-          <span className="text-sm text-[#E8E2D6] font-light">No upcoming meeting</span>
+          <div className="h-2 w-2 rounded-full bg-calendar-status"></div>
+          <span className="text-sm text-calendar-text-primary font-light">No upcoming meeting</span>
         </div>
-        <p className="text-sm text-[#8A8578] font-light">Add a new event to your calendar to get started.</p>
+        <p className="text-sm text-calendar-text-secondary font-light">Add a new event to your calendar to get started.</p>
       </div>
 
       {/* Week day labels */}
-      <div className="flex border-b border-[#1E2A36] bg-[#0D1419] text-sm sticky top-0 z-40">
-        <div className="w-[72px] flex items-center justify-center px-2 py-4 text-[#8A8578]">
+      <div className="flex border-b border-calendar-border-primary bg-calendar-bg-secondary text-sm sticky top-0 z-40">
+        <div className="w-[72px] flex items-center justify-center px-2 py-4 text-calendar-text-secondary">
           Time
         </div>
         {weekDays.map((day) => (
           <div
             key={day.toISOString()}
             className={`
-              flex-1 px-2 py-4 text-center hover:bg-[#1E2A36]/30 cursor-pointer
+              flex-1 px-2 py-4 text-center hover:bg-calendar-hover/30 cursor-pointer
               ${isSameDay(day, referenceDate) ? "font-medium" : "font-light"}
             `}
           >
-            <span className="text-[#8A8578]">{format(day, "EEE")}</span>{" "}
-            <span className="text-[#E8E2D6]">{format(day, "d")}</span>
+            <span className="text-calendar-text-secondary">{format(day, "EEE")}</span>{" "}
+            <span className="text-calendar-text-primary">{format(day, "d")}</span>
           </div>
         ))}
       </div>
@@ -196,10 +195,10 @@ export function WeekGridClient() {
       <div className="flex-1 overflow-y-scroll custom-scrollbar select-none relative z-30">
         <div className="flex flex-1 h-[1440px] cursor-grab active:cursor-grabbing">
           {/* Time labels */}
-          <div className="w-[72px] flex-none border-r border-[#1E2A36] sticky left-0 bg-[#0A0F14] z-30">
+          <div className="w-[72px] flex-none border-r border-calendar-border-primary sticky left-0 bg-calendar-bg-primary z-30">
             {timeSlots.map((hour) => (
               <div key={hour} className="relative h-[60px]">
-                <div className="absolute -top-2 right-4 text-sm text-[#8A8578] font-light">
+                <div className="absolute -top-2 right-4 text-sm text-calendar-text-secondary font-light">
                   {formatTime(hour)}
                 </div>
               </div>
@@ -211,26 +210,26 @@ export function WeekGridClient() {
             {weekDays.map((day) => (
               <div
                 key={day.toISOString()}
-                className="flex-1 border-l border-[#1E2A36]/50 relative"
+                className="flex-1 border-l border-calendar-border-secondary relative"
               >
                 {timeSlots.map((hour) => (
                   <div
                     key={hour}
-                    className="h-[60px] border-b border-[#1E2A36]/20 relative hover:bg-[#1E2A36]/10 transition-colors duration-150"
+                    className="h-[60px] border-b border-calendar-border-tertiary relative hover:bg-calendar-hover/10 transition-colors duration-150"
                   />
                 ))}
 
                 {/* Render events for this day */}
-                {getEventsForDay(day, events || [])}
+                {getEventsForDay(day, fetchedEvents || [])}
               </div>
             ))}
           </div>
         </div>
         
         {/* Simple footer */}
-        <div className="flex w-full border-t border-[#1E2A36]">
-          <div className="w-full py-8 text-center bg-gradient-to-b from-[#0A0F14] to-[#0D1419]">
-            <div className="text-sm text-[#8A8578] font-light">
+        <div className="flex w-full border-t border-calendar-border-primary">
+          <div className="w-full py-8 text-center bg-gradient-to-b from-calendar-bg-primary to-calendar-bg-secondary">
+            <div className="text-sm text-calendar-text-secondary font-light">
               End of calendar view
             </div>
           </div>

@@ -37,7 +37,7 @@ export async function updateUserProfile(input: UserUpdateInput) {
     if (!validationResult.success) {
       return {
         success: false,
-        error: 'Validation failed',
+        error: "Validation failed",
         details: validationResult.error.format()
       };
     }

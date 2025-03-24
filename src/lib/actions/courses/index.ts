@@ -246,6 +246,61 @@ export async function getUserCourses(): Promise<CourseResult<any[]>> {
 }
 
 /**
+ * Gets a course by ID
+ * 
+ * @param id ID of the course to get
+ * @returns Result object with success status and course data
+ */
+export async function getCourseById(id: string): Promise<CourseResult<any>> {
+  'use server';
+
+  try {
+    // Initialize Supabase client
+    const supabase = createClient();
+
+    // Get the current user session
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return {
+        success: false,
+        error: 'Unauthorized',
+      };
+    }
+
+    // Get the user ID from the session
+    const userId = session.user.id;
+    
+    // Get the course by ID
+    const { data, error } = await supabase
+      .from('courses')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error getting course by ID:', error);
+      return {
+        success: false,
+        error: 'Failed to get course by ID',
+        details: { message: error.message }
+      };
+    }
+    
+    // Return success response with course data
+    return {
+      success: true,
+      data: data[0]
+    };
+  } catch (error) {
+    console.error('Error in getCourseById:', error);
+    return {
+      success: false,
+      error: 'Internal server error',
+    };
+  }
+}
+
+/**
  * Deletes a course
  * 
  * @param id ID of the course to delete

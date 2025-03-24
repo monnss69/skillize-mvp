@@ -6,10 +6,6 @@ import { getUserProfile } from "@/lib/actions";
 export const useUser = () => {
   const { data: session, status: sessionStatus } = useSession();
   
-  // For debugging
-  console.log("Session status:", sessionStatus);
-  console.log("Session data:", session);
-  
   const { data, isLoading, error } = useQuery({
     queryKey: ['user', session?.user?.id],
     queryFn: async () => {

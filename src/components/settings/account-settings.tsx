@@ -21,20 +21,20 @@ export default function AccountSettings() {
       className="container min-h-[calc(100vh-4rem)] py-8 relative"
     >
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1E2A36]/20 via-[#0A0F14] to-[#1E2A36]/10 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-settings-gradient-from via-settings-gradient-via to-settings-gradient-to pointer-events-none" />
       
       <div className="relative max-w-3xl mx-auto space-y-8">
         <div className="space-y-2 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-[#B8A47C]">Account Settings</h2>
-          <p className="text-[#E8E2D6]/60">Manage your account connections and preferences</p>
+          <h2 className="text-3xl font-bold tracking-tight text-settings-text-accent">Account Settings</h2>
+          <p className="text-settings-text-secondary">Manage your account connections and preferences</p>
         </div>
 
-        <Card className="border-[#1E2A36] bg-[#0D1419] shadow-lg backdrop-blur-[2px] relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#1E2A36]/10 via-transparent to-[#1E2A36]/5 opacity-50" />
+        <Card className="border-settings-border-primary bg-settings-bg-secondary shadow-lg backdrop-blur-[2px] relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-settings-gradient-from via-transparent to-settings-gradient-to opacity-50" />
           
           <CardHeader className="relative">
-            <CardTitle className="text-xl font-semibold text-[#E8E2D6]">Connected Accounts</CardTitle>
-            <CardDescription className="text-[#E8E2D6]/60">Manage your connected accounts and services</CardDescription>
+            <CardTitle className="text-xl font-semibold text-settings-text-primary">Connected Accounts</CardTitle>
+            <CardDescription className="text-settings-text-secondary">Manage your connected accounts and services</CardDescription>
           </CardHeader>
 
           <CardContent className="relative">
@@ -44,38 +44,38 @@ export default function AccountSettings() {
                 <GoogleConnectButton variant="cardConnect" />
 
                 {/* Outlook - Not Connected */}
-                <div className="group flex items-center justify-between p-4 rounded-lg border border-[#1E2A36] hover:border-[#B8A47C]/30 hover:bg-[#1E2A36]/20 transition-all duration-300">
+                <div className="group flex items-center justify-between p-4 rounded-lg border border-settings-border-primary hover:border-settings-border-accent-hover hover:bg-settings-bg-tertiary/20 transition-all duration-300">
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#1E2A36]/50 border border-[#B8A47C]/20 group-hover:border-[#B8A47C]/30 group-hover:bg-[#1E2A36]/70 transition-colors duration-300">
-                      <Mail className="h-6 w-6 text-[#B8A47C]/70 group-hover:text-[#B8A47C] transition-colors duration-300" />
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-settings-bg-tertiary/50 border border-settings-border-accent/20 group-hover:border-settings-border-accent/30 group-hover:bg-settings-bg-tertiary/70 transition-colors duration-300">
+                      <Mail className="h-6 w-6 text-settings-text-accent/70 group-hover:text-settings-text-accent transition-colors duration-300" />
                     </div>
                     <div>
-                      <p className="font-medium text-lg text-[#E8E2D6]">Outlook</p>
-                      <p className="text-[#E8E2D6]/60">Connect with Outlook</p>
+                      <p className="font-medium text-lg text-settings-text-primary">Outlook</p>
+                      <p className="text-settings-text-secondary">Connect with Outlook</p>
                     </div>
                   </div>
                   <Button 
                     variant="outline" 
-                    className="border-[#1E2A36] text-black hover:bg-[#1E2A36]/50 hover:text-[#B8A47C] group-hover:border-[#B8A47C]/30 transition-colors duration-300"
+                    className="border-settings-border-primary text-black hover:bg-settings-bg-tertiary/50 hover:text-settings-text-accent group-hover:border-settings-border-accent-hover transition-colors duration-300"
                   >
                     Connect
                   </Button>
                 </div>
 
                 {/* iOS - Not Connected */}
-                <div className="group flex items-center justify-between p-4 rounded-lg border border-[#1E2A36] hover:border-[#B8A47C]/30 hover:bg-[#1E2A36]/20 transition-all duration-300">
+                <div className="group flex items-center justify-between p-4 rounded-lg border border-settings-border-primary hover:border-settings-border-accent-hover hover:bg-settings-bg-tertiary/20 transition-all duration-300">
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#1E2A36]/50 border border-[#B8A47C]/20 group-hover:border-[#B8A47C]/30 group-hover:bg-[#1E2A36]/70 transition-colors duration-300">
-                      <Smartphone className="h-6 w-6 text-[#B8A47C]/70 group-hover:text-[#B8A47C] transition-colors duration-300" />
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-settings-bg-tertiary/50 border border-settings-border-accent/20 group-hover:border-settings-border-accent/30 group-hover:bg-settings-bg-tertiary/70 transition-colors duration-300">
+                      <Smartphone className="h-6 w-6 text-settings-text-accent/70 group-hover:text-settings-text-accent transition-colors duration-300" />
                     </div>
                     <div>
-                      <p className="font-medium text-lg text-[#E8E2D6]">iOS</p>
-                      <p className="text-[#E8E2D6]/60">Connect with iOS</p>
+                      <p className="font-medium text-lg text-settings-text-primary">iOS</p>
+                      <p className="text-settings-text-secondary">Connect with iOS</p>
                     </div>
                   </div>
                   <Button 
                     variant="outline"
-                    className="border-[#1E2A36] text-black hover:bg-[#1E2A36]/50 hover:text-[#B8A47C] group-hover:border-[#B8A47C]/30 transition-colors duration-300"
+                    className="border-settings-border-primary text-black hover:bg-settings-bg-tertiary/50 hover:text-settings-text-accent group-hover:border-settings-border-accent-hover transition-colors duration-300"
                   >
                     Connect
                   </Button>
@@ -87,7 +87,7 @@ export default function AccountSettings() {
         
         <div className="flex justify-center pt-4">
           <SignOutButton 
-            className="px-8 bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 border border-red-500/30 hover:border-red-500/40 transition-colors duration-300" 
+            className="px-8 bg-settings-button-danger hover:bg-settings-button-danger-hover text-settings-button-danger-text hover:text-settings-button-danger-text-hover border border-settings-button-danger-text/30 hover:border-settings-button-danger-text/40 transition-colors duration-300" 
           />
         </div>
       </div>

@@ -31,7 +31,6 @@ interface EditEventProps {
 }
 
 export default function EditEvent({ event, isOpen, onClose, onSubmit }: EditEventProps) {
-  console.log(event);
   const [formData, setFormData] = useState({
     id: event?.id || "",
     title: event?.title || "",
@@ -40,8 +39,6 @@ export default function EditEvent({ event, isOpen, onClose, onSubmit }: EditEven
     end_time: event?.original_end_time || "",
     color: event?.color || "#B8A47C",
   })
-
-  console.log(formData);
   
   const [activeField, setActiveField] = useState<string | null>(null)
   const [animateIn, setAnimateIn] = useState(false)

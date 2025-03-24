@@ -23,14 +23,14 @@ export default function SettingsLayout({
   ]
 
   return (
-    <div className="min-h-screen bg-[#0A0F14] text-[#E8E2D6]">
+    <div className="min-h-screen bg-settings-bg-primary text-settings-text-primary">
       {/* Top Navigation */}
-      <nav className="bg-[#0D1419] p-4">
+      <nav className="bg-settings-bg-secondary p-4">
         <div className="container mx-auto flex justify-between items-center">
           <Button
             variant="ghost"
             size="icon"
-            className="text-[#B8A47C] hover:text-[#D4C8A8] hover:bg-[#1E2A36]/30 h-10 w-10 mr-4"
+            className="text-settings-text-accent hover:text-settings-text-accent-hover hover:bg-settings-bg-tertiary/30 h-10 w-10 mr-4"
             onClick={() => router.back()}
           >
             <ArrowLeft size={20} />
@@ -40,8 +40,8 @@ export default function SettingsLayout({
               <Button
                 key={tab.id}
                 variant="ghost"
-                className={`text-[#E8E2D6] hover:text-[#D4C8A8] hover:bg-[#1E2A36]/50 ${
-                  activeTab === tab.id ? "bg-[#1E2A36]/30" : ""
+                className={`text-settings-text-primary hover:text-settings-text-accent-hover hover:bg-settings-bg-tertiary/50 ${
+                  activeTab === tab.id ? "bg-settings-bg-tertiary/30" : ""
                 }`}
                 onClick={() => {
                   setActiveTab(tab.id)
@@ -57,10 +57,10 @@ export default function SettingsLayout({
       </nav>
 
       {/* Border */}
-      <div className="relative h-0.5 bg-[#D3B665]"></div>
+      <div className="relative h-0.5 bg-settings-button-primary"></div>
 
       {/* Main content */}
-      <div className="container mx-auto mt-8 p-8 bg-[#0D1419] rounded-lg">
+      <div className="container mx-auto mt-8 p-8 bg-settings-bg-secondary rounded-lg">
         {children}
       </div>
     </div>

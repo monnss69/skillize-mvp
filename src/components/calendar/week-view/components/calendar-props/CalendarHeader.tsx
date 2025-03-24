@@ -36,19 +36,19 @@ export function CalendarHeader({
           variant="ghost"
           size="icon"
           onClick={handlePrevWeek}
-          className="text-[#B8A47C] hover:text-[#D4C8A8] hover:bg-[#1E2A36]/30 h-10 w-10"
+          className="text-calendar-accent-primary hover:text-calendar-hover-light hover:bg-calendar-overlay-hover h-10 w-10"
           aria-label="Previous week"
         >
           <ChevronLeft size={20} />
         </Button>
-        <h1 className="text-xl font-light tracking-wide text-[#E8E2D6]">
+        <h1 className="text-xl font-light tracking-wide text-calendar-text-primary">
           {format(referenceDate, "MMMM yyyy")}
         </h1>
         <Button
           variant="ghost"
           size="icon"
           onClick={handleNextWeek}
-          className="text-[#B8A47C] hover:text-[#D4C8A8] hover:bg-[#1E2A36]/30 h-10 w-10"
+          className="text-calendar-accent-primary hover:text-calendar-hover-light hover:bg-calendar-overlay-hover h-10 w-10"
           aria-label="Next week"
         >
           <ChevronRight size={20} />
@@ -59,9 +59,9 @@ export function CalendarHeader({
         <Button
           variant="outline"
           onClick={handleToday}
-          className="border-[#1E2A36] bg-transparent hover:bg-[#1E2A36]/50 hover:text-[#D4C8A8] h-11 w-full px-4 text-[#E8E2D6] font-light"
+          className="border-calendar-hover bg-transparent hover:bg-calendar-overlay-hover hover:text-calendar-hover-light h-11 w-full px-4 text-calendar-text-primary font-light"
         >
-          <Clock className="h-5 w-5 text-[#B8A47C]" />
+          <Clock className="h-5 w-5 text-calendar-accent-primary" />
           Today
         </Button>
         
@@ -69,7 +69,7 @@ export function CalendarHeader({
         <div className="p-5">
           <Button 
             onClick={() => setCreateEventOpen(true)}
-            className="w-full bg-[#B8A47C] hover:bg-[#D4C8A8] text-[#0A0F14] h-11 font-medium"
+            className="w-full bg-calendar-accent-primary hover:bg-calendar-hover-light text-calendar-bg-primary h-11 font-medium"
           >
             <Plus className="h-5 w-5" />
             <span>New Event</span>
@@ -77,7 +77,7 @@ export function CalendarHeader({
           
           {/* Modal displayed in center when open */}
           {createEventOpen && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="fixed inset-0 bg-calendar-overlay flex items-center justify-center z-50">
               <div className="relative">
                 <CreateEventModal onClose={() => setCreateEventOpen(false)} />
               </div>

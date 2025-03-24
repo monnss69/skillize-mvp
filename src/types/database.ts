@@ -6,12 +6,24 @@ export interface Event {
   start_time: string; // ISO timestamp
   end_time: string;   // ISO timestamp
   color: string | null;
-  is_completed: boolean;
   recurrence_rule: string | null;      // RRULE string (e.g., "FREQ=WEEKLY;COUNT=10")
   is_recurring: boolean;               // Whether this is a recurring event
   recurrence_id: string | null;        // Series identifier
   source: string | null;
   status: "confirmed" | "cancelled",               // Source of the event ('google', 'local', etc.)
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CourseContent {
+  id: string;
+  course_id: string;
+  title: string;
+  description: string | null;
+  start_time: string; // ISO timestamp
+  end_time: string;   // ISO timestamp
+  color: string | null;
+  is_completed: boolean;
   created_at: string;
   updated_at: string;
 }
