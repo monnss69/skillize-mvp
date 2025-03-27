@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Search } from "lucide-react"
-import { Button } from "@/components/shadcn-ui/button"
 import { Input } from "@/components/shadcn-ui/input"
 import { CourseCard } from "@/components/course/CourseCard"
 import { CreateCourseModal } from "@/components/course/CreateCourseModal"

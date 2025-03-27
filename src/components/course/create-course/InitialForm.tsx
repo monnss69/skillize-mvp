@@ -8,9 +8,10 @@ import { Textarea } from "@/components/shadcn-ui/textarea"
 import { Button } from "@/components/shadcn-ui/button"
 
 interface FormData {
-  objective: string
+  learningSubject: string
   goal: string
   duration: string
+  dailyStudyTime: string
 }
 
 interface InitialFormProps {
@@ -27,6 +28,11 @@ export function InitialForm({ formData, setFormData, onSubmit }: InitialFormProp
     setFormData({ ...formData, [name]: value })
   }
 
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    onSubmit(e)
+  }
+
   return (
     <>
       <DialogHeader className="space-y-2">
@@ -39,14 +45,14 @@ export function InitialForm({ formData, setFormData, onSubmit }: InitialFormProp
       <form onSubmit={onSubmit} className="space-y-4 mt-4">
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="objective" className="text-course-card-text-primary text-sm">
-              Learning Objective
+            <Label htmlFor="learningSubject" className="text-course-card-text-primary text-sm">
+              Learning Subject
             </Label>
             <Textarea
-              id="objective"
-              name="objective"
+              id="learningSubject"
+              name="learningSubject"
               placeholder="What do you want to learn?"
-              value={formData.objective}
+              value={formData.learningSubject}
               onChange={handleInputChange}
               required
               className="min-h-[80px] bg-course-card-bg border-course-card-border focus:border-course-card-border-hover text-course-card-text-primary resize-none"
@@ -88,7 +94,7 @@ export function InitialForm({ formData, setFormData, onSubmit }: InitialFormProp
         </div>
 
         <Button 
-          type="submit" 
+          type="submit"
           className="w-full bg-primary hover:bg-gray-700 text-primary-foreground border-gray-700 border"
         >
           Continue

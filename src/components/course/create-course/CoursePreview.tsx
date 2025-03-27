@@ -16,12 +16,14 @@ interface CourseData {
 }
 
 interface CoursePreviewProps {
-  courseData: CourseData
+  courseData: CourseData | null
   onClose: () => void
   onSave: () => void
 }
 
 export function CoursePreview({ courseData, onClose, onSave }: CoursePreviewProps) {
+  if (!courseData) return null;
+
   const calculateTotalTime = () => {
     const totalHours = courseData.courseOverview.reduce((total: number, module: CourseModule) => {
       const hours = Number.parseInt(module.estimatedTime.split(" ")[0]) || 0

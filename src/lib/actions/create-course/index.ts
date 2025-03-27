@@ -13,7 +13,10 @@ const createCourseSchema = z.object({
 })
 
 const createCourseWithQuestionAndAnswerSchema = z.object({
-  course: createCourseSchema,
+  duration: z.string().min(1),
+  dailyStudyTime: z.string().min(1),
+  learningSubject: z.string().min(1),
+  goal: z.string().min(1),
   question: z.array(z.string()).min(1),
   answer: z.array(z.string()).min(1),
 })
@@ -27,8 +30,9 @@ export async function createCourseWithQuestion(course: z.infer<typeof createCour
   }
 
   const response = await axios.post(`${baseUrl}/ai-create-with-question`, course);
+  console.log(response.data)
 
-  return response.data.json();
+  return response.data;
 }
 
 export async function createCourseWithQuestionAndAnswer(course: z.infer<typeof createCourseWithQuestionAndAnswerSchema>) {
@@ -40,5 +44,5 @@ export async function createCourseWithQuestionAndAnswer(course: z.infer<typeof c
 
   const response = await axios.post(`${baseUrl}/ai-create-with-question-and-answer`, course);
 
-  return response.data.json();
+  return response.data;
 }
