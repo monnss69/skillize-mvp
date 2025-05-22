@@ -1,6 +1,3 @@
-'use client'
-
-import { useState, useEffect } from "react"
 import { CalendarClock, CheckCircle, Clock, ArrowRight } from "lucide-react"
 import { Course, CourseContent } from "@/types/database"
 import { getCourseContent } from "@/lib/actions/course-content"

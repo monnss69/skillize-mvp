@@ -17,7 +17,7 @@ import {
   createCourseWithQuestionAndAnswer,
 } from "@/lib/actions/create-course";
 import { useUserPreferences } from "@/hooks/use-user-preference";
-
+import { revalidatePath } from "next/cache";
 type Step = "input" | "questions" | "loading" | "preview";
 
 interface FormData {
@@ -36,7 +36,7 @@ interface CourseData {
   }[];
 }
 
-
+// The window that is opened when the user clicks the "Create a new Course" button
 export function CreateCourseModal() {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<Step>("input");
@@ -51,10 +51,12 @@ export function CreateCourseModal() {
   const { data: userPreferences } = useUserPreferences();
   const router = useRouter();
 
+  // When the user preferences are updated, update the form data
   useEffect(() => {
     setFormData({...formData, dailyStudyTime: userPreferences?.study_duration.toString() || ""})
   }, [userPreferences])
 
+  // First step of the course creation process
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStep("loading");
@@ -69,20 +71,25 @@ export function CreateCourseModal() {
         text: question,
         answer: "",
       }));
-
-      setQuestions(modifiedQuestions);
-      setStep("questions");
+      if (modifiedQuestions.length > 0) {
+        setQuestions(modifiedQuestions);
+        setStep("questions");
+      } else {
+        handleFinalSubmit();
+      }
     } else {
       setStep("input");
     }
   };
 
+  // When the user answers a question, update the questions array
   const handleAnswerChange = (id: number, value: string) => {
     setQuestions(
       questions.map((q) => (q.id === id ? { ...q, answer: value } : q))
     );
   };
 
+  // When the user submits the final form, create the course
   const handleFinalSubmit = async () => {
     // Reset for next use
     const questionArray = questions.map((question) => question.text);
@@ -104,16 +111,16 @@ export function CreateCourseModal() {
     }
   };
 
+  // When the user closes the course creation window, reset the form data and questions
   const handleClose = () => {
-    console.log("Final submission:", { formData, questions });
     setOpen(false);
     setStep("input");
     setFormData({ learningSubject: "", goal: "", duration: "", dailyStudyTime: "" });
     setQuestions([]);
   };
 
+  // When the user saves the course, reset the course data
   const handleSave = () => {
-    console.log("Saving course data:", courseData);
     // Reset the course data
     setCourseData(null);
     setOpen(false);
@@ -121,6 +128,7 @@ export function CreateCourseModal() {
     setFormData({ learningSubject: "", goal: "", duration: "", dailyStudyTime: "" });
     setQuestions([]);
     router.push("/courses");
+    revalidatePath("/courses");
   };
 
   return (
