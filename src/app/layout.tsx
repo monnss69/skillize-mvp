@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import "../styles/globals.css";
-import { NextAuthProvider } from "@/providers/next-auth-provider";
+import { NextAuthProvider } from "@/providers/nextAuthProvider";
 import { Toaster } from "sonner";
-import { ReactQueryProvider } from "@/providers/react-query-provider";
-import { GoogleConnectionProvider } from '@/contexts/google-connect-context';
+import { ReactQueryProvider } from "@/providers/reactQueryProvider";
+import { GoogleConnectionProvider } from '@/contexts/googleConnectContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 

@@ -6,7 +6,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { JWT } from 'next-auth/jwt';
 import { ExtendedSession } from '@/types';
 import { compare } from 'bcryptjs';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/backend/supabase/server';
 
 async function refreshAccessToken(token: JWT): Promise<JWT> {
   try {

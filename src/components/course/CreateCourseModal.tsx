@@ -6,17 +6,17 @@ import {
   Dialog,
   DialogContent,
   DialogTrigger,
-} from "@/components/shadcn-ui/dialog";
-import { Button } from "@/components/shadcn-ui/button";
-import { InitialForm } from "./create-course/InitialForm";
-import { QuestionForm } from "./create-course/QuestionForm";
-import { CoursePreview } from "./create-course/CoursePreview";
+} from "@/components/Dialog";
+import { Button } from "@/components/Button";
+import { InitialForm } from "../createCourseModal/InitialForm";
+import { QuestionForm } from "../createCourseModal/QuestionForm";
+import { CoursePreview } from "../createCourseModal/CoursePreview";
 import { useRouter } from "next/navigation";
 import {
   createCourseWithQuestion,
   createCourseWithQuestionAndAnswer,
-} from "@/lib/actions/create-course";
-import { useUserPreferences } from "@/hooks/use-user-preference";
+} from "@/backend/actions/create-course";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { revalidatePath } from "next/cache";
 type Step = "input" | "questions" | "loading" | "preview";
 
